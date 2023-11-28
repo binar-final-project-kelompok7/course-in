@@ -1,0 +1,121 @@
+openapi: 3.0.3
+info:
+  title: Binar Course
+  version: 1.0.0
+  description: Binar Final Project MSIB Batch 5 K7
+  contact:
+    name: K7
+    url: https://github.com/BinarFinalProjectKel7
+  license:
+    name: Creative Commons Attribution 4.0 International
+    url: https://creativecommons.org/licenses/by/4.0/
+servers:
+  - url: https://{environment}.example.com/api/v1
+    variables:
+      environment:
+        default: dev
+        description: Server Environment for Binar Course
+        enum:
+          - dev
+          - qa
+          - prod
+paths:
+  /login:
+    post:
+      summary: Login Request
+      description: Login to Application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  required: true
+                password:
+                  type: string
+                  format: password
+                  minLength: 1
+                  maxLength: 100
+                  required: true
+            examples:
+              bambang:
+                value:
+                  email: bambang@example.com
+                  password: bambangSalto123
+              ucok:
+                value:
+                  email: ucokslayer@example.com
+                  password: ucokmarkocok
+              mukidin:
+                value:
+                  email: mukidinmurahsenyum@example.com
+                  password: antidugem
+      responses:
+        200:
+          headers:
+            Authorization:
+              schema:
+                type: string
+                format: bearer
+                example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                  status:
+                    type: string
+                  data:
+                    type: string
+                    default: null
+              example:
+                code: 200
+                status: CREATED
+                data: null
+          description: Login success
+        400:
+          description: Failed to login because wrong format of data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                  status:
+                    type: string
+                  data:
+                    type: string
+                    default: null
+                example:
+                  code: 400
+                  status: BAD REQUEST
+                  data: null
+        401:
+          description: Failed to login because wrong credential
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                  status:
+                    type: string
+                  data:
+                    type: string
+                    default: null
+              example:
+                code: 401
+                status: UNAUTHORIZED
+                data: null

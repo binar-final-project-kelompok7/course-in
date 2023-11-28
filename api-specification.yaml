@@ -22,6 +22,8 @@ servers:
 paths:
   /login:
     post:
+      tags:
+        - Auth
       summary: Login Request
       description: Login to Application
       requestBody:

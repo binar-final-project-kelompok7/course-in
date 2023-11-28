@@ -32,7 +32,7 @@ public class Role {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(unique = true, length = 50)
+    @Column(unique = true, nullable = false, length = 50)
     private UserRole name;
 
     @ManyToMany(mappedBy = "roles")

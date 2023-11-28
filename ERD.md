@@ -5,6 +5,7 @@ erDiagram
     USERS {
         bigint id PK
         varchar(100) name
+        varchar(50) username UK
         varchar(100) email UK
         varchar(250) password
         timestamp created_at
@@ -17,23 +18,17 @@ erDiagram
         text description
         double price
         varchar(200) link UK
+        varchar(100) category
         varchar(50) type
         varchar(50) level
         timestamp created_at
         timestamp updated_at
-        bigint category_id FK
     }
 
     RESET_PASSWORD {
         string token PK
         string email
         timestamp expired_date
-    }
-
-    CATEGORY {
-        bigint id PK
-        varchar(100) name UK
-
     }
 
     INTENDED {
@@ -64,7 +59,7 @@ erDiagram
     ORDERS {
         String id PK
         timestamp created_at
-        varchar(100) status
+        varchar(50) status
         bigint user_id FK
     }
 
@@ -74,13 +69,11 @@ erDiagram
         double price
         double total_transfer
     }
-
-    USERS }o--o{ COURSES : have
+    
     USERS ||--o{ ORDERS : places
     USERS ||--o{ USER_COURSES : has
     USERS ||--o{ USER_ROLES : has
     ROLES ||--o{ USER_ROLES : has
-    COURSES }o--|| CATEGORY : has
     COURSES ||--o{ INTENDED_COURSES : has
     COURSES ||--o{ ORDER_DETAILS : has
     COURSES ||--o{ USER_COURSES : has

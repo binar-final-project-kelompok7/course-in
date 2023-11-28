@@ -33,15 +33,14 @@ paths:
               properties:
                 email:
                   type: string
-                  minLength: 1
                   maxLength: 100
-                  required: true
                 password:
                   type: string
                   format: password
-                  minLength: 1
                   maxLength: 100
-                  required: true
+              required:
+                - email
+                - password
             examples:
               bambang:
                 value:

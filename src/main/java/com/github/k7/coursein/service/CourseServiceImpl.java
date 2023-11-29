@@ -2,6 +2,7 @@ package com.github.k7.coursein.service;
 
 import com.github.k7.coursein.entity.Course;
 import com.github.k7.coursein.model.CourseResponse;
+import com.github.k7.coursein.model.PagingRequest;
 import com.github.k7.coursein.repository.CourseRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class CourseServiceImpl implements CourseService{
+public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private CourseRepository courseRepository;
@@ -25,12 +26,12 @@ public class CourseServiceImpl implements CourseService{
 
     @Override
     @Transactional(readOnly = true)
-    public CourseResponse getCourse(String courseName) {
-        log.info("Getting course by name: {}", courseName);
+    public CourseResponse getCourse(Long id) {
+        log.info("Getting course by id: {}", id);
 
-        Course course = courseRepository.findByName(courseName)
+        Course course = courseRepository.findById(id)
             .orElseThrow(() -> {
-                log.warn("Course not found: {}", courseName);
+                log.warn("Course not found: {}", id);
                 return new ResponseStatusException(HttpStatus.NOT_FOUND, COURSE_NOT_FOUND_MESSAGE);
             });
 
@@ -41,35 +42,22 @@ public class CourseServiceImpl implements CourseService{
 
     @Override
     @Transactional(readOnly = true)
-    public Page<CourseResponse> getAllAvailableCourse(int page, int size) {
-        log.info("Fetching all available courses. Page: {}, Size: {}", page, size);
+    public Page<CourseResponse> getAllCourse(PagingRequest request) {
+        log.info("Fetching all available courses. Page: {}, Size: {}", request.getPage(), request.getSize());
 
-        if (page < 0 || size <= 0) {
-            log.error("Invalid page or size provided. Page: {}, Size: {}", page, size);
-            throw new IllegalArgumentException("The page must not be negative and the size must be more than 0");
-        }
-
-        PageRequest pageRequest = PageRequest.of(page, size);
+        PageRequest pageRequest = PageRequest.of(request.getPage(), request.getSize());
         Page<Course> allCoursesPage = courseRepository.findAll(pageRequest);
 
-        if (allCoursesPage.isEmpty()) {
-            log.warn("No course available right now");
-        } else {
-            log.info("Found {} available courses", allCoursesPage.getTotalElements());
-        }
-
-        // mengkonversi setiap objek course dalam allCoursesPage menjadi objek CourseResponse
         List<CourseResponse> courseResponses = allCoursesPage.getContent().stream()
             .map(CourseServiceImpl::toCourseResponse)
             .collect(Collectors.toList());
 
-        log.info("Returning {} courses on page {} of size {}", courseResponses.size(), page, size);
+        log.info("Returning {} courses on page {} of size {}", courseResponses.size(), request.getPage(), request.getSize());
 
         return new PageImpl<>(courseResponses, pageRequest, allCoursesPage.getTotalElements());
     }
 
     public static CourseResponse toCourseResponse(Course course) {
-        // set properti Course Response
         return CourseResponse.builder()
             .id(course.getId())
             .name(course.getName())

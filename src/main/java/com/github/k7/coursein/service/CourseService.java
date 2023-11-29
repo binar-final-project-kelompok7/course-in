@@ -7,5 +7,5 @@ import org.springframework.data.domain.Page;
 public interface CourseService {
     CourseResponse getCourse(Long id);
 
-    Page<CourseResponse> getAllCourse(PagingRequest request);
+    Page<CourseResponse> getAllCourse(int page, int size);
 }

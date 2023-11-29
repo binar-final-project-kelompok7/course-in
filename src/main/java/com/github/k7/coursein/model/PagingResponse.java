@@ -9,10 +9,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PagingRequest {
+public class PagingResponse {
 
-    private int page;
+    private Integer currentPage;
 
-    private int size;
+    private Integer totalPage;
+
+    private Integer size;
 
 }

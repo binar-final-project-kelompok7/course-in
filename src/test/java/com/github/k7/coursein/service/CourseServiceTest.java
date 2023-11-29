@@ -5,6 +5,7 @@ import com.github.k7.coursein.enums.CourseCategory;
 import com.github.k7.coursein.enums.CourseLevel;
 import com.github.k7.coursein.enums.CourseType;
 import com.github.k7.coursein.model.CourseResponse;
+import com.github.k7.coursein.model.PagingRequest;
 import com.github.k7.coursein.repository.CourseRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,8 +35,8 @@ public class CourseServiceTest {
     private CourseServiceImpl courseService;
 
     @Test
-    void getCourse_success() {
-        when(courseRepository.findByName("test"))
+    void testgetCourse_success() {
+        when(courseRepository.findById(1L))
             .thenReturn(Optional.ofNullable(Course.builder()
                 .id(1L)
                 .name("test")
@@ -47,19 +48,18 @@ public class CourseServiceTest {
                 .level(CourseLevel.BEGINNER)
                 .build()));
 
-        // melakukan pengetesan method getCourse apakah null atau tidak
-        CourseResponse result = courseService.getCourse("test");
+        CourseResponse result = courseService.getCourse(1L);
         Assertions.assertNotNull(result);
 
-        Mockito.verify(courseRepository, Mockito.times(1)).findByName("test");
+        Mockito.verify(courseRepository, Mockito.times(1)).findById(1L);
     }
 
     @Test
-    void testGetAllAvailableCourse() {
-        // Buat data kursus palsu (data dummy)
+    void testGetAllCourse_success() {
         List<Course> mockCourses = new ArrayList<>();
 
         mockCourses.add(Course.builder()
+            .id(1L)
             .name("Test 1")
             .description("Deskripsi test 1")
             .price(100.0)
@@ -70,6 +70,7 @@ public class CourseServiceTest {
             .build());
 
         mockCourses.add(Course.builder()
+            .id(2L)
             .name("Test 2")
             .description("Deskripsi test 2")
             .price(200.0)
@@ -81,10 +82,9 @@ public class CourseServiceTest {
 
         Page<Course> mockPage = new PageImpl<>(mockCourses);
 
-        // melakukan simulasi repositori untuk mengembalikan halaman dummy saat metode findAll dipanggil
         when(courseRepository.findAll(Mockito.any(PageRequest.class))).thenReturn(mockPage);
 
-        Page<CourseResponse> resultPage = courseService.getAllAvailableCourse(0, 8);
+        Page<CourseResponse> resultPage = courseService.getAllCourse(new PagingRequest(0, 8));
         Assertions.assertEquals(mockCourses.size(), resultPage.getContent().size());
 
         Mockito.verify(courseRepository).findAll(PageRequest.of(0, 8));

@@ -94,6 +94,8 @@ public class CourseServiceImpl implements CourseService {
 
         updateCourseProperties(course, request);
 
+        course.setUpdatedAt(LocalDateTime.now());
+
         courseRepository.save(course);
 
         log.info("Course updated successfully");

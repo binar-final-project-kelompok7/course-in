@@ -2,6 +2,7 @@ package com.github.k7.coursein.service;
 
 import com.github.k7.coursein.entity.Course;
 import com.github.k7.coursein.model.CourseResponse;
+import com.github.k7.coursein.model.UpdateCourseRequest;
 import com.github.k7.coursein.repository.CourseRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
 public class CourseServiceImpl implements CourseService {
 
     private final CourseRepository courseRepository;
+
+    private final ValidationService validationService;
 
     private static final String COURSE_NOT_FOUND_MESSAGE = "Course not found";
 
@@ -75,6 +79,65 @@ public class CourseServiceImpl implements CourseService {
 
         log.info("Course deleted successfully");
     }
+
+    @Override
+    public CourseResponse updateCourse(Long id, UpdateCourseRequest request) {
+        validationService.validate(request);
+
+        Course course = courseRepository.findById(id)
+            .orElseThrow(() -> {
+                log.info("Course not found: {}", id);
+                return new ResponseStatusException(HttpStatus.NOT_FOUND, COURSE_NOT_FOUND_MESSAGE);
+            });
+
+        log.info("Updating course with ID: {}", id);
+
+        updateCourseProperties(course, request);
+
+        courseRepository.save(course);
+
+        log.info("Course updated successfully");
+
+        return toCourseResponse(course);
+    }
+
+    private void updateCourseProperties(Course course, UpdateCourseRequest request) {
+        if (request.getName() != null) {
+            course.setName(request.getName());
+            log.info("Updated course name to: {}", request.getName());
+        }
+
+        if (request.getDescription() != null) {
+            course.setDescription(request.getDescription());
+            log.info("Updated course description to: {}", request.getDescription());
+        }
+
+        if (request.getPrice() != null) {
+            course.setPrice(request.getPrice());
+            log.info("Updated course price to: {}", request.getPrice());
+        }
+
+        if (request.getLink() != null) {
+            course.setLink(request.getLink());
+            log.info("Updated course link to: {}", request.getLink());
+        }
+
+        if (request.getCategory() != null) {
+            course.setCategory(request.getCategory());
+            log.info("Updated course category to: {}", request.getCategory());
+        }
+
+        if (request.getType() != null) {
+            course.setType(request.getType());
+            log.info("Updated course type to: {}", request.getType());
+        }
+
+        if (request.getLevel() != null) {
+            course.setLevel(request.getLevel());
+            log.info("Updated course level to: {}", request.getLevel());
+        }
+    }
+
 
     public static CourseResponse toCourseResponse(Course course) {
         return CourseResponse.builder()

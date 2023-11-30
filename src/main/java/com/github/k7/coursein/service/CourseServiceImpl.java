@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -81,6 +82,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @Transactional
     public CourseResponse updateCourse(Long id, UpdateCourseRequest request) {
         validationService.validate(request);
 
@@ -104,37 +106,37 @@ public class CourseServiceImpl implements CourseService {
     }
 
     private void updateCourseProperties(Course course, UpdateCourseRequest request) {
-        if (request.getName() != null) {
+        if (Objects.nonNull(request.getName())) {
             course.setName(request.getName());
             log.info("Updated course name to: {}", request.getName());
         }
 
-        if (request.getDescription() != null) {
+        if (Objects.nonNull(request.getDescription())) {
             course.setDescription(request.getDescription());
             log.info("Updated course description to: {}", request.getDescription());
         }
 
-        if (request.getPrice() != null) {
+        if (Objects.nonNull(request.getPrice())) {
             course.setPrice(request.getPrice());
             log.info("Updated course price to: {}", request.getPrice());
         }
 
-        if (request.getLink() != null) {
+        if (Objects.nonNull(request.getLink())) {
             course.setLink(request.getLink());
             log.info("Updated course link to: {}", request.getLink());
         }
 
-        if (request.getCategory() != null) {
+        if (Objects.nonNull(request.getCategory())) {
             course.setCategory(request.getCategory());
             log.info("Updated course category to: {}", request.getCategory());
         }
 
-        if (request.getType() != null) {
+        if (Objects.nonNull(request.getType())) {
             course.setType(request.getType());
             log.info("Updated course type to: {}", request.getType());
         }
 
-        if (request.getLevel() != null) {
+        if (Objects.nonNull(request.getLevel())) {
             course.setLevel(request.getLevel());
             log.info("Updated course level to: {}", request.getLevel());
         }

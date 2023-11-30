@@ -5,7 +5,6 @@ import com.github.k7.coursein.enums.CourseCategory;
 import com.github.k7.coursein.enums.CourseLevel;
 import com.github.k7.coursein.enums.CourseType;
 import com.github.k7.coursein.model.CourseResponse;
-import com.github.k7.coursein.model.PagingRequest;
 import com.github.k7.coursein.repository.CourseRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -22,8 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Mockito.when;
-
 @SpringBootTest
 @AutoConfigureMockMvc
 public class CourseServiceTest {
@@ -35,8 +32,8 @@ public class CourseServiceTest {
     private CourseServiceImpl courseService;
 
     @Test
-    void testgetCourse_success() {
-        when(courseRepository.findById(1L))
+    void testGetCourse_success() {
+        Mockito.when(courseRepository.findById(1L))
             .thenReturn(Optional.ofNullable(Course.builder()
                 .id(1L)
                 .name("test")
@@ -82,12 +79,30 @@ public class CourseServiceTest {
 
         Page<Course> mockPage = new PageImpl<>(mockCourses);
 
-        when(courseRepository.findAll(Mockito.any(PageRequest.class))).thenReturn(mockPage);
+        Mockito.when(courseRepository.findAll(Mockito.any(PageRequest.class))).thenReturn(mockPage);
 
         Page<CourseResponse> resultPage = courseService.getAllCourse(0, 8);
         Assertions.assertEquals(mockCourses.size(), resultPage.getContent().size());
 
         Mockito.verify(courseRepository).findAll(PageRequest.of(0, 8));
+    }
+
+    @Test
+    void testDeleteCourse_success() {
+        Course mockCourse = Course.builder()
+            .id(1L)
+            .name("Test 1")
+            .price(100.0)
+            .link("http://inilink.com/test1")
+            .category(CourseCategory.WEB_DEVELOPMENT)
+            .build();
+
+        Mockito.when(courseRepository.findById(1L)).thenReturn(java.util.Optional.of(mockCourse));
+
+        courseService.deleteCourse(1L);
+
+        Mockito.verify(courseRepository, Mockito.times(1)).findById(1L);
+        Mockito.verify(courseRepository, Mockito.times(1)).delete(mockCourse);
     }
 
 }

@@ -10,6 +10,8 @@ public interface CourseService {
 
     Page<CourseResponse> getAllCourse(int page, int size);
 
+    void deleteCourse(Long id);
+
     Boolean nameLinkAvailability(CourseRequest courseRequest);
 
     Boolean addCourse(CourseRequest courseRequest);

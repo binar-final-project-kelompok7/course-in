@@ -124,6 +124,24 @@ public class CourseServiceImpl implements CourseService {
         return Boolean.FALSE;
     }
 
+    @Override
+    @Transactional
+    public void deleteCourse(Long id) {
+        log.info("Deleting course with ID: {}", id);
+
+        Course course = courseRepository.findById(id)
+            .orElseThrow(() -> {
+                log.info("Course not found : {}", id);
+                return new ResponseStatusException(HttpStatus.NOT_FOUND, COURSE_NOT_FOUND_MESSAGE);
+            });
+
+        log.info("Course found: {}", course);
+
+        courseRepository.delete(course);
+
+        log.info("Course deleted successfully");
+    }
+
     public static CourseResponse toCourseResponse(Course course) {
         return CourseResponse.builder()
             .id(course.getId())

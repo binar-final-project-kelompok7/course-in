@@ -43,15 +43,15 @@ public class CourseController {
         @RequestParam(name = "page", defaultValue = "0") int page,
         @RequestParam(name = "size", defaultValue = "10") int size
     ) {
-        Page<CourseResponse> allProduct = courseService.getAllCourse(page, size);
+        Page<CourseResponse> allCourse = courseService.getAllCourse(page, size);
         return WebResponse.<List<CourseResponse>>builder()
             .code(HttpStatus.OK.value())
             .message(HttpStatus.OK.getReasonPhrase())
-            .data(allProduct.getContent())
+            .data(allCourse.getContent())
             .paging(PagingResponse.builder()
-                .currentPage(allProduct.getNumber())
-                .totalPage(allProduct.getTotalPages())
-                .size(allProduct.getSize())
+                .currentPage(allCourse.getNumber())
+                .totalPage(allCourse.getTotalPages())
+                .size(allCourse.getSize())
                 .build())
             .build();
     }

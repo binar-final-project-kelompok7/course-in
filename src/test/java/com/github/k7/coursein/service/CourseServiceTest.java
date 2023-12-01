@@ -4,7 +4,7 @@ import com.github.k7.coursein.entity.Course;
 import com.github.k7.coursein.enums.CourseCategory;
 import com.github.k7.coursein.enums.CourseLevel;
 import com.github.k7.coursein.enums.CourseType;
-import com.github.k7.coursein.model.CourseRequest;
+import com.github.k7.coursein.model.AddCourseRequest;
 import com.github.k7.coursein.model.CourseResponse;
 import com.github.k7.coursein.repository.CourseRepository;
 import org.junit.jupiter.api.Assertions;
@@ -113,7 +113,7 @@ public class CourseServiceTest {
     @Test
     void testValidationCourse_failed_field() {
         Mockito.doThrow(ConstraintViolationException.class).when(validationService).validate(Mockito.any());
-        CourseRequest cr = CourseRequest.builder()
+        AddCourseRequest cr = AddCourseRequest.builder()
             .name("")
             .build();
         Assertions.assertThrows(ConstraintViolationException.class, () -> validationService.validate(cr));

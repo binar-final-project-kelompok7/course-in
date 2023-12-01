@@ -19,7 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CourseRequest {
+public class AddCourseRequest {
 
     @NotBlank
     @Size(max = 200)

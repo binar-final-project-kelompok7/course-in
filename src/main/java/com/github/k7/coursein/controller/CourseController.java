@@ -1,6 +1,6 @@
 package com.github.k7.coursein.controller;
 
-import com.github.k7.coursein.model.CourseRequest;
+import com.github.k7.coursein.model.AddCourseRequest;
 import com.github.k7.coursein.model.CourseResponse;
 import com.github.k7.coursein.model.PagingResponse;
 import com.github.k7.coursein.model.WebResponse;
@@ -63,7 +63,7 @@ public class CourseController {
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public WebResponse<String> addCourse(@RequestBody CourseRequest addCourseRequest) {
+    public WebResponse<String> addCourse(@RequestBody AddCourseRequest addCourseRequest) {
         courseService.addCourse(addCourseRequest);
         return WebResponse.<String>builder()
             .code(HttpStatus.CREATED.value())

@@ -1,6 +1,6 @@
 package com.github.k7.coursein.service;
 
-import com.github.k7.coursein.model.CourseRequest;
+import com.github.k7.coursein.model.AddCourseRequest;
 import com.github.k7.coursein.model.CourseResponse;
 import org.springframework.data.domain.Page;
 
@@ -12,6 +12,6 @@ public interface CourseService {
 
     void deleteCourse(Long id);
 
-    void addCourse(CourseRequest courseRequest);
+    void addCourse(AddCourseRequest courseRequest);
 
 }

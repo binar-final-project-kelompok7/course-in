@@ -2,7 +2,7 @@ package com.github.k7.coursein.service;
 
 import com.github.k7.coursein.entity.Course;
 import com.github.k7.coursein.enums.CourseType;
-import com.github.k7.coursein.model.CourseRequest;
+import com.github.k7.coursein.model.AddCourseRequest;
 import com.github.k7.coursein.model.CourseResponse;
 import com.github.k7.coursein.repository.CourseRepository;
 import lombok.AllArgsConstructor;
@@ -65,7 +65,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
-    public void addCourse(CourseRequest request) {
+    public void addCourse(AddCourseRequest request) {
         LocalDateTime createdAndUpdated = LocalDateTime.now();
 
         validationService.validate(request);

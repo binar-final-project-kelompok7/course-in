@@ -1,5 +1,6 @@
 package com.github.k7.coursein.controller;
 
+import com.github.k7.coursein.model.CourseRequest;
 import com.github.k7.coursein.model.CourseResponse;
 import com.github.k7.coursein.model.PagingResponse;
 import com.github.k7.coursein.model.WebResponse;
@@ -8,11 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -56,4 +53,16 @@ public class CourseController {
             .build();
     }
 
+    @PostMapping(
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public WebResponse<String> addCourse(@RequestBody CourseRequest request) {
+        courseService.addCourse(request);
+        return WebResponse.<String>builder()
+            .code(HttpStatus.CREATED.value())
+            .message(HttpStatus.CREATED.getReasonPhrase())
+            .data("Course Added")
+            .build();
+    }
 }

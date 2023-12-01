@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -96,7 +97,11 @@ public class CourseServiceImpl implements CourseService {
 
         updateCourseProperties(course, request);
 
-        course.setUpdatedAt(LocalDateTime.now());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedLocalDateTime = LocalDateTime.now().format(formatter);
+        LocalDateTime localDateTime = LocalDateTime.parse(formattedLocalDateTime, formatter);
+
+        course.setUpdatedAt(localDateTime);
 
         courseRepository.save(course);
 

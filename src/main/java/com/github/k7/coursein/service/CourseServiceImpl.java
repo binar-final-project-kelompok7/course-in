@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -65,69 +64,40 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public Boolean nameLinkAvailability(CourseRequest courseRequest) {
-
-        try {
-            validationService.validate(courseRequest);
-        } catch (ConstraintViolationException cve) {
-            log.error("Error: {}", cve.getMessage());
-            return Boolean.FALSE;
-        }
-
-        Boolean courseNameAlreadyExist = courseRepository.existsByName(courseRequest.getName());
-        Boolean courseLinkAlreadyExist = courseRepository.existsByLink(courseRequest.getLink());
-
-        if (courseNameAlreadyExist && courseLinkAlreadyExist) {
-            log.error("Course with name {} and link {} already existed in the database", courseRequest.getName(), courseRequest.getLink());
-            return Boolean.FALSE;
-        } else if (courseNameAlreadyExist) {
-            log.error("Course with name {} already existed in the database", courseRequest.getName());
-            return Boolean.FALSE;
-        } else if (courseLinkAlreadyExist) {
-            log.error("Course with link {} already existed in the database", courseRequest.getLink());
-            return Boolean.FALSE;
-        }
-
-        return Boolean.TRUE;
-    }
-
-    @Override
     @Transactional
-    public Boolean addCourse(CourseRequest courseRequest) {
+    public void addCourse(CourseRequest request) {
+        LocalDateTime createdAndUpdated = LocalDateTime.now();
 
-        if (this.nameLinkAvailability(courseRequest)) {
-            LocalDateTime createdAndUpdated = LocalDateTime.now();
+        validationService.validate(request);
 
-            if (courseRequest.getType().equals(CourseType.FREE)) {
-                courseRequest.setPrice(0.0);
-            }
-
-            try {
-                log.info("Building the course from request.");
-                Course toBeAddedCourse = Course
-                    .builder()
-                    .name(courseRequest.getName())
-                    .description(courseRequest.getDescription())
-                    .price(courseRequest.getPrice())
-                    .link(courseRequest.getLink())
-                    .category(courseRequest.getCategory())
-                    .type(courseRequest.getType())
-                    .level(courseRequest.getLevel())
-                    .intendeds(courseRequest.getIntendeds())
-                    .createdAt(createdAndUpdated)
-                    .updatedAt(createdAndUpdated)
-                    .build();
-                log.info("Done building. Saving to database...");
-                courseRepository.save(toBeAddedCourse);
-                log.info("Course saved successfully");
-                return Boolean.TRUE;
-            } catch (Exception e) {
-                log.error("Failed to add course.");
-                log.error("Cause: {}", e.getMessage());
-                return Boolean.FALSE;
-            }
+        if (courseRepository.existsByNameOrLink(request.getName(), request.getLink())) {
+            log.info(
+                "Course with name : {} or link : {} already exists", request.getName(), request.getLink()
+            );
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Course already exists");
         }
-        return Boolean.FALSE;
+
+        if (request.getType().equals(CourseType.FREE)) {
+            request.setPrice(0.0);
+        }
+
+        log.info("Building the course from request.");
+        Course toBeAddedCourse = Course
+            .builder()
+            .name(request.getName())
+            .description(request.getDescription())
+            .price(request.getPrice())
+            .link(request.getLink())
+            .category(request.getCategory())
+            .type(request.getType())
+            .level(request.getLevel())
+            .intendeds(request.getIntendeds())
+            .createdAt(createdAndUpdated)
+            .updatedAt(createdAndUpdated)
+            .build();
+        log.info("Done building. Saving to database...");
+        courseRepository.save(toBeAddedCourse);
+        log.info("Course saved successfully");
     }
 
     @Override

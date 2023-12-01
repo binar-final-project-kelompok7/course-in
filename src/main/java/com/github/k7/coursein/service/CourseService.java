@@ -12,8 +12,6 @@ public interface CourseService {
 
     void deleteCourse(Long id);
 
-    Boolean nameLinkAvailability(CourseRequest courseRequest);
-
-    Boolean addCourse(CourseRequest courseRequest);
+    void addCourse(CourseRequest courseRequest);
 
 }

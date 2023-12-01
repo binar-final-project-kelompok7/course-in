@@ -4,6 +4,7 @@ import com.github.k7.coursein.entity.Course;
 import com.github.k7.coursein.enums.CourseCategory;
 import com.github.k7.coursein.enums.CourseLevel;
 import com.github.k7.coursein.enums.CourseType;
+import com.github.k7.coursein.model.CourseRequest;
 import com.github.k7.coursein.model.CourseResponse;
 import com.github.k7.coursein.repository.CourseRepository;
 import org.junit.jupiter.api.Assertions;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
+import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +32,9 @@ public class CourseServiceTest {
 
     @InjectMocks
     private CourseServiceImpl courseService;
+
+    @Mock
+    private ValidationServiceImpl validationService;
 
     @Test
     void testGetCourse_success() {
@@ -103,6 +108,15 @@ public class CourseServiceTest {
 
         Mockito.verify(courseRepository, Mockito.times(1)).findById(1L);
         Mockito.verify(courseRepository, Mockito.times(1)).delete(mockCourse);
+    }
+
+    @Test
+    void testValidationCourse_failed_field() {
+        Mockito.doThrow(ConstraintViolationException.class).when(validationService).validate(Mockito.any());
+        CourseRequest cr = CourseRequest.builder()
+            .name("")
+            .build();
+        Assertions.assertThrows(ConstraintViolationException.class, () -> validationService.validate(cr));
     }
 
 }

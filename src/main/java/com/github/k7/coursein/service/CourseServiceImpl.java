@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -66,7 +67,12 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Boolean nameLinkAvailability(CourseRequest courseRequest) {
 
-        validationService.validate(courseRequest);
+        try {
+            validationService.validate(courseRequest);
+        } catch (ConstraintViolationException cve) {
+            log.error("Error: {}", cve.getMessage());
+            return Boolean.FALSE;
+        }
 
         Boolean courseNameAlreadyExist = courseRepository.existsByName(courseRequest.getName());
         Boolean courseLinkAlreadyExist = courseRepository.existsByLink(courseRequest.getLink());

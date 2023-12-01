@@ -53,7 +53,7 @@ public class CourseController {
     }
 
     @DeleteMapping(
-        path = "delete/{id}",
+        path = "/delete/{courseId}",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )

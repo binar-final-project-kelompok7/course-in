@@ -2,6 +2,7 @@ package com.github.k7.coursein.service;
 
 import com.github.k7.coursein.entity.Course;
 import com.github.k7.coursein.model.CourseResponse;
+import com.github.k7.coursein.model.UpdateCourseRequest;
 import com.github.k7.coursein.repository.CourseRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -22,6 +26,8 @@ import java.util.stream.Collectors;
 public class CourseServiceImpl implements CourseService {
 
     private final CourseRepository courseRepository;
+
+    private final ValidationService validationService;
 
     private static final String COURSE_NOT_FOUND_MESSAGE = "Course not found";
 
@@ -75,6 +81,72 @@ public class CourseServiceImpl implements CourseService {
 
         log.info("Course deleted successfully");
     }
+
+    @Override
+    @Transactional
+    public CourseResponse updateCourse(Long id, UpdateCourseRequest request) {
+        validationService.validate(request);
+
+        Course course = courseRepository.findById(id)
+            .orElseThrow(() -> {
+                log.info("Course not found: {}", id);
+                return new ResponseStatusException(HttpStatus.NOT_FOUND, COURSE_NOT_FOUND_MESSAGE);
+            });
+
+        log.info("Updating course with ID: {}", id);
+
+        updateCourseProperties(course, request);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedLocalDateTime = LocalDateTime.now().format(formatter);
+        LocalDateTime localDateTime = LocalDateTime.parse(formattedLocalDateTime, formatter);
+
+        course.setUpdatedAt(localDateTime);
+
+        courseRepository.save(course);
+
+        log.info("Course updated successfully");
+
+        return toCourseResponse(course);
+    }
+
+    private void updateCourseProperties(Course course, UpdateCourseRequest request) {
+        if (Objects.nonNull(request.getName())) {
+            course.setName(request.getName());
+            log.info("Updated course name to: {}", request.getName());
+        }
+
+        if (Objects.nonNull(request.getDescription())) {
+            course.setDescription(request.getDescription());
+            log.info("Updated course description to: {}", request.getDescription());
+        }
+
+        if (Objects.nonNull(request.getPrice())) {
+            course.setPrice(request.getPrice());
+            log.info("Updated course price to: {}", request.getPrice());
+        }
+
+        if (Objects.nonNull(request.getLink())) {
+            course.setLink(request.getLink());
+            log.info("Updated course link to: {}", request.getLink());
+        }
+
+        if (Objects.nonNull(request.getCategory())) {
+            course.setCategory(request.getCategory());
+            log.info("Updated course category to: {}", request.getCategory());
+        }
+
+        if (Objects.nonNull(request.getType())) {
+            course.setType(request.getType());
+            log.info("Updated course type to: {}", request.getType());
+        }
+
+        if (Objects.nonNull(request.getLevel())) {
+            course.setLevel(request.getLevel());
+            log.info("Updated course level to: {}", request.getLevel());
+        }
+    }
+
 
     public static CourseResponse toCourseResponse(Course course) {
         return CourseResponse.builder()

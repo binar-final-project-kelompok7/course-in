@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -73,6 +74,26 @@ public class CustomExceptionHandler {
                 .code(HttpStatus.BAD_REQUEST.value())
                 .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .errors(exception.getMessage())
+                .build());
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<WebResponse<String>> exception(BadCredentialsException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(WebResponse.<String>builder()
+                .code(HttpStatus.BAD_REQUEST.value())
+                .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .errors(exception.getMessage())
+                .build());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<WebResponse<String>> exception() {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(WebResponse.<String>builder()
+                .code(HttpStatus.BAD_REQUEST.value())
+                .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .errors("Internal Server error!")
                 .build());
     }
 

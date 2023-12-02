@@ -73,7 +73,7 @@ public class CourseController {
             .build();
     }
 
-    @PatchMapping(
+  @PatchMapping(
         path = "/{courseId}",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
@@ -85,7 +85,20 @@ public class CourseController {
             .code(HttpStatus.OK.value())
             .message(HttpStatus.OK.getReasonPhrase())
             .data(courseResponse)
+
             .build();
+    }
+
+    @DeleteMapping(
+        path = "/delete/{courseId}",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public WebResponse<String> deleteCourse(@PathVariable("courseId") Long courseId) {
+        courseService.deleteCourse(courseId);
+        return WebResponse.<String>builder()
+            .code(HttpStatus.OK.value())
+            .message(HttpStatus.OK.getReasonPhrase())
     }
 
 }

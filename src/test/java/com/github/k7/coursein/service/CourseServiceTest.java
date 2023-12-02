@@ -4,6 +4,7 @@ import com.github.k7.coursein.entity.Course;
 import com.github.k7.coursein.enums.CourseCategory;
 import com.github.k7.coursein.enums.CourseLevel;
 import com.github.k7.coursein.enums.CourseType;
+import com.github.k7.coursein.model.AddCourseRequest;
 import com.github.k7.coursein.model.CourseResponse;
 import com.github.k7.coursein.model.UpdateCourseRequest;
 import com.github.k7.coursein.repository.CourseRepository;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
+import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +41,9 @@ public class CourseServiceTest {
 
     @InjectMocks
     private CourseServiceImpl courseService;
+
+    @Mock
+    private ValidationServiceImpl validationService;
 
     @Test
     void testGetCourse_success() {
@@ -114,6 +119,14 @@ public class CourseServiceTest {
         Mockito.verify(courseRepository, Mockito.times(1)).delete(mockCourse);
     }
 
+    @Test
+    void testValidationCourse_failed_field() {
+        Mockito.doThrow(ConstraintViolationException.class).when(validationService).validate(Mockito.any());
+        AddCourseRequest cr = AddCourseRequest.builder()
+            .name("")
+            .build();
+        Assertions.assertThrows(ConstraintViolationException.class, () -> validationService.validate(cr));
+      
     @Test
     void testUpdateCourse_success() {
         Course existingCourse = Course.builder()

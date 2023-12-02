@@ -1,6 +1,8 @@
 package com.github.k7.coursein.service;
 
 import com.github.k7.coursein.entity.Course;
+import com.github.k7.coursein.enums.CourseType;
+import com.github.k7.coursein.model.AddCourseRequest;
 import com.github.k7.coursein.model.CourseResponse;
 import com.github.k7.coursein.model.UpdateCourseRequest;
 import com.github.k7.coursein.repository.CourseRepository;
@@ -30,6 +32,47 @@ public class CourseServiceImpl implements CourseService {
     private final ValidationService validationService;
 
     private static final String COURSE_NOT_FOUND_MESSAGE = "Course not found";
+
+    @Override
+    @Transactional
+    public void addCourse(AddCourseRequest request) {
+        validationService.validate(request);
+
+        if (courseRepository.existsByNameOrLink(request.getName(), request.getLink())) {
+            log.info(
+                "Course with name : {} or link : {} already exists", request.getName(), request.getLink()
+            );
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Course already exists");
+        }
+
+        if (request.getType().equals(CourseType.FREE)) {
+            request.setPrice(0.0);
+        }
+
+        log.info("Building the course from request.");
+
+        Course course = Course.builder()
+            .name(request.getName())
+            .description(request.getDescription())
+            .price(request.getPrice())
+            .link(request.getLink())
+            .category(request.getCategory())
+            .type(request.getType())
+            .level(request.getLevel())
+            .intendeds(request.getIntendeds())
+            .createdAt(getFormattedDateTimeNow())
+            .updatedAt(getFormattedDateTimeNow())
+            .build();
+        log.info("Done building. Saving to database...");
+        courseRepository.save(course);
+        log.info("Course saved successfully");
+    }
+
+    private static LocalDateTime getFormattedDateTimeNow() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedLocalDateTime = LocalDateTime.now().format(formatter);
+        return LocalDateTime.parse(formattedLocalDateTime, formatter);
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -96,13 +139,7 @@ public class CourseServiceImpl implements CourseService {
         log.info("Updating course with ID: {}", id);
 
         updateCourseProperties(course, request);
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String formattedLocalDateTime = LocalDateTime.now().format(formatter);
-        LocalDateTime localDateTime = LocalDateTime.parse(formattedLocalDateTime, formatter);
-
-        course.setUpdatedAt(localDateTime);
-
+        course.setUpdatedAt(getFormattedDateTimeNow());
         courseRepository.save(course);
 
         log.info("Course updated successfully");
@@ -147,8 +184,8 @@ public class CourseServiceImpl implements CourseService {
         }
     }
 
-
     public static CourseResponse toCourseResponse(Course course) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return CourseResponse.builder()
             .id(course.getId())
             .name(course.getName())
@@ -158,8 +195,8 @@ public class CourseServiceImpl implements CourseService {
             .category(course.getCategory())
             .type(course.getType())
             .level(course.getLevel())
-            .createdAt(course.getCreatedAt())
-            .updatedAt(course.getUpdatedAt())
+            .createdAt(course.getCreatedAt().format(formatter))
+            .updatedAt(course.getUpdatedAt().format(formatter))
             .build();
     }
 

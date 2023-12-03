@@ -91,9 +91,9 @@ public class CustomExceptionHandler {
     public ResponseEntity<WebResponse<String>> exception() {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(WebResponse.<String>builder()
-                .code(HttpStatus.BAD_REQUEST.value())
-                .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .errors("Internal Server error!")
+                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .message(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                .errors("Can't process request because of server error")
                 .build());
     }
 

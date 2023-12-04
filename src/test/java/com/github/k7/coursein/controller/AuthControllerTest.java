@@ -18,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -51,7 +50,7 @@ class AuthControllerTest {
 
         Set<Role> roles = new HashSet<>();
         Role role = new Role();
-        role.setName(UserRole.ROLE_USER);
+        role.setName(UserRole.USER);
 
         User user = User.builder()
             .username("for_testing")
@@ -59,8 +58,6 @@ class AuthControllerTest {
             .email("fortesting@example.com")
             .password(passwordEncoder.encode("password"))
             .roles(roles)
-            .createdAt(LocalDateTime.now())
-            .updatedAt(LocalDateTime.now())
             .build();
         userRepository.save(user);
     }

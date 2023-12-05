@@ -10,6 +10,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,20 +34,22 @@ public class CourseController {
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public WebResponse<String> addCourse(@RequestBody AddCourseRequest addCourseRequest) {
-        courseService.addCourse(addCourseRequest);
-        return WebResponse.<String>builder()
-            .code(HttpStatus.CREATED.value())
-            .message(HttpStatus.CREATED.getReasonPhrase())
-            .build();
+    public ResponseEntity<WebResponse<CourseResponse>> addCourse(@RequestBody AddCourseRequest addCourseRequest) {
+        CourseResponse courseResponse = courseService.addCourse(addCourseRequest);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(WebResponse.<CourseResponse>builder()
+                .code(HttpStatus.CREATED.value())
+                .message(HttpStatus.CREATED.getReasonPhrase())
+                .data(courseResponse)
+                .build());
     }
 
     @GetMapping(
-        path = "/{courseId}",
+        path = "/{courseCode}",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public WebResponse<CourseResponse> getCourse(@PathVariable("courseId") Long courseId) {
-        CourseResponse courseResponse = courseService.getCourse(courseId);
+    public WebResponse<CourseResponse> getCourse(@PathVariable("courseCode") String courseCode) {
+        CourseResponse courseResponse = courseService.getCourse(courseCode);
         return WebResponse.<CourseResponse>builder()
             .code(HttpStatus.OK.value())
             .message(HttpStatus.OK.getReasonPhrase())
@@ -73,32 +77,31 @@ public class CourseController {
             .build();
     }
 
-  @PatchMapping(
-        path = "/{courseId}",
+    @PatchMapping(
+        path = "/{courseCode}",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public WebResponse<CourseResponse> updateCourse(@PathVariable("courseId") Long courseId,
+    public WebResponse<CourseResponse> updateCourse(@PathVariable("courseCode") String courseCode,
                                                     @RequestBody UpdateCourseRequest updateCourseRequest) {
-        CourseResponse courseResponse = courseService.updateCourse(courseId, updateCourseRequest);
+        CourseResponse courseResponse = courseService.updateCourse(courseCode, updateCourseRequest);
         return WebResponse.<CourseResponse>builder()
             .code(HttpStatus.OK.value())
             .message(HttpStatus.OK.getReasonPhrase())
             .data(courseResponse)
-
             .build();
     }
 
     @DeleteMapping(
-        path = "/delete/{courseId}",
-        consumes = MediaType.APPLICATION_JSON_VALUE,
+        path = "/delete/{courseCode}",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public WebResponse<String> deleteCourse(@PathVariable("courseId") Long courseId) {
-        courseService.deleteCourse(courseId);
+    public WebResponse<String> deleteCourse(@PathVariable("courseCode") String courseCode) {
+        courseService.deleteCourse(courseCode);
         return WebResponse.<String>builder()
             .code(HttpStatus.OK.value())
             .message(HttpStatus.OK.getReasonPhrase())
+            .build();
     }
 
 }

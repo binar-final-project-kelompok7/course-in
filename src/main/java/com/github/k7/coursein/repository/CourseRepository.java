@@ -9,7 +9,10 @@ import java.util.Optional;
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
 
-    Optional<Course> findByName(String name);
+    Optional<Course> findByCode(String code);
 
-    Boolean existsByNameOrLink(String name, String link);
+    boolean existsByCode(String code);
+
+    boolean existsByNameOrLink(String name, String link);
+
 }

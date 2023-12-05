@@ -7,14 +7,14 @@ import org.springframework.data.domain.Page;
 
 public interface CourseService {
 
-    void addCourse(AddCourseRequest courseRequest);
+    CourseResponse addCourse(AddCourseRequest courseRequest);
 
-    CourseResponse getCourse(Long id);
+    CourseResponse getCourse(String code);
 
     Page<CourseResponse> getAllCourse(int page, int size);
 
-    CourseResponse updateCourse(Long id, UpdateCourseRequest request);
+    CourseResponse updateCourse(String code, UpdateCourseRequest request);
 
-    void deleteCourse(Long id);
+    void deleteCourse(String code);
 
 }

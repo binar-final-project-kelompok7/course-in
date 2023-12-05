@@ -5,44 +5,39 @@ import com.github.k7.coursein.enums.CourseLevel;
 import com.github.k7.coursein.enums.CourseType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.Set;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class UpdateCourseRequest {
 
-    @Size(max = 255)
+    @Size(max = 200)
     private String name;
+
+    @Size(max = 100)
+    private String author;
 
     private String description;
 
     @Min(1)
     private Double price;
 
-    @NotBlank
     @Size(max = 200)
     private String link;
 
-    @NotNull
-    @Size(max = 50)
     private CourseCategory category;
 
-    @NotNull
-    @Size(max = 50)
     private CourseType type;
 
-    @NotNull
-    @Size(max = 50)
     private CourseLevel level;
+
+    private Set<String> intendeds;
 
 }

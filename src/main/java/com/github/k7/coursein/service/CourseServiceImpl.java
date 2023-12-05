@@ -1,11 +1,13 @@
 package com.github.k7.coursein.service;
 
 import com.github.k7.coursein.entity.Course;
+import com.github.k7.coursein.entity.Intended;
 import com.github.k7.coursein.enums.CourseType;
 import com.github.k7.coursein.model.AddCourseRequest;
 import com.github.k7.coursein.model.CourseResponse;
 import com.github.k7.coursein.model.UpdateCourseRequest;
 import com.github.k7.coursein.repository.CourseRepository;
+import com.github.k7.coursein.util.TimeUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -16,10 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -35,53 +37,77 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
-    public void addCourse(AddCourseRequest request) {
+    public CourseResponse addCourse(AddCourseRequest request) {
         validationService.validate(request);
 
-        if (courseRepository.existsByNameOrLink(request.getName(), request.getLink())) {
+        if (Boolean.TRUE.equals(courseRepository.existsByCode(request.getCode()))) {
+            log.info("Course with code : {} already exists", request.getCode());
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Course with code : " + request.getCode() + " already exist"
+            );
+        }
+
+        if (Boolean.TRUE.equals(courseRepository.existsByNameOrLink(request.getName(), request.getLink()))) {
             log.info(
                 "Course with name : {} or link : {} already exists", request.getName(), request.getLink()
             );
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Course already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Name or link course already exist");
         }
 
-        if (request.getType().equals(CourseType.FREE)) {
-            request.setPrice(0.0);
+        if (request.getPrice() == 0.0 && request.getType().equals(CourseType.PREMIUM)) {
+            request.setType(CourseType.FREE);
         }
 
-        log.info("Building the course from request.");
+        if (request.getPrice() > 0.0 && request.getType().equals(CourseType.FREE)) {
+            request.setType(CourseType.PREMIUM);
+        }
 
         Course course = Course.builder()
+            .code(request.getCode().toUpperCase())
             .name(request.getName())
+            .author(request.getAuthor())
             .description(request.getDescription())
             .price(request.getPrice())
             .link(request.getLink())
             .category(request.getCategory())
             .type(request.getType())
             .level(request.getLevel())
-            .intendeds(request.getIntendeds())
-            .createdAt(getFormattedDateTimeNow())
-            .updatedAt(getFormattedDateTimeNow())
             .build();
-        log.info("Done building. Saving to database...");
+
+        HashSet<Intended> intendeds = new HashSet<>();
+
+        mapIntendedStringToObject(request.getIntendeds(), course, intendeds);
+
+        course.setIntendeds(intendeds);
+
         courseRepository.save(course);
         log.info("Course saved successfully");
+
+        return toCourseResponse(course);
     }
 
-    private static LocalDateTime getFormattedDateTimeNow() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String formattedLocalDateTime = LocalDateTime.now().format(formatter);
-        return LocalDateTime.parse(formattedLocalDateTime, formatter);
+    private static void mapIntendedStringToObject(Set<String> request,
+                                                  Course course,
+                                                  HashSet<Intended> intendeds) {
+        request.forEach(purpose -> {
+            Intended intended = Intended.builder()
+                .purpose(purpose.trim())
+                .course(course)
+                .build();
+
+            intendeds.add(intended);
+        });
     }
 
     @Override
     @Transactional(readOnly = true)
-    public CourseResponse getCourse(Long id) {
-        log.info("Getting course by id: {}", id);
+    public CourseResponse getCourse(String code) {
+        log.info("Getting course by id: {}", code);
 
-        Course course = courseRepository.findById(id)
+        Course course = courseRepository.findByCode(code)
             .orElseThrow(() -> {
-                log.warn("Course not found: {}", id);
+                log.warn("Course not found: {}", code);
                 return new ResponseStatusException(HttpStatus.NOT_FOUND, COURSE_NOT_FOUND_MESSAGE);
             });
 
@@ -109,37 +135,18 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
-    public void deleteCourse(Long id) {
-        log.info("Deleting course with ID: {}", id);
-
-        Course course = courseRepository.findById(id)
-            .orElseThrow(() -> {
-                log.info("Course not found : {}", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, COURSE_NOT_FOUND_MESSAGE);
-            });
-
-        log.info("Course found: {}", course);
-
-        courseRepository.delete(course);
-
-        log.info("Course deleted successfully");
-    }
-
-    @Override
-    @Transactional
-    public CourseResponse updateCourse(Long id, UpdateCourseRequest request) {
+    public CourseResponse updateCourse(String code, UpdateCourseRequest request) {
         validationService.validate(request);
 
-        Course course = courseRepository.findById(id)
+        Course course = courseRepository.findByCode(code)
             .orElseThrow(() -> {
-                log.info("Course not found: {}", id);
+                log.info("Course not found: {}", code);
                 return new ResponseStatusException(HttpStatus.NOT_FOUND, COURSE_NOT_FOUND_MESSAGE);
             });
 
-        log.info("Updating course with ID: {}", id);
+        log.info("Updating course with Code: {}", code);
 
         updateCourseProperties(course, request);
-        course.setUpdatedAt(getFormattedDateTimeNow());
         courseRepository.save(course);
 
         log.info("Course updated successfully");
@@ -151,6 +158,11 @@ public class CourseServiceImpl implements CourseService {
         if (Objects.nonNull(request.getName())) {
             course.setName(request.getName());
             log.info("Updated course name to: {}", request.getName());
+        }
+
+        if (Objects.nonNull(request.getAuthor())) {
+            course.setAuthor(request.getAuthor());
+            log.info("Updated course author to: {}", request.getAuthor());
         }
 
         if (Objects.nonNull(request.getDescription())) {
@@ -182,12 +194,19 @@ public class CourseServiceImpl implements CourseService {
             course.setLevel(request.getLevel());
             log.info("Updated course level to: {}", request.getLevel());
         }
+
+        if (Objects.nonNull(request.getIntendeds())) {
+            HashSet<Intended> intendeds = new HashSet<>();
+
+            mapIntendedStringToObject(request.getIntendeds(), course, intendeds);
+            course.setIntendeds(intendeds);
+        }
     }
 
     public static CourseResponse toCourseResponse(Course course) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return CourseResponse.builder()
-            .id(course.getId())
+            .code(course.getCode())
+            .author(course.getAuthor())
             .name(course.getName())
             .description(course.getDescription())
             .price(course.getPrice())
@@ -195,9 +214,30 @@ public class CourseServiceImpl implements CourseService {
             .category(course.getCategory())
             .type(course.getType())
             .level(course.getLevel())
-            .createdAt(course.getCreatedAt().format(formatter))
-            .updatedAt(course.getUpdatedAt().format(formatter))
+            .createdAt(TimeUtil.formatToString(course.getCreatedAt()))
+            .updatedAt(TimeUtil.formatToString(course.getUpdatedAt()))
+            .intendeds(course.getIntendeds().stream()
+                .map(Intended::getPurpose)
+                .collect(Collectors.toSet()))
             .build();
+    }
+
+    @Override
+    @Transactional
+    public void deleteCourse(String code) {
+        log.info("Deleting course with Code: {}", code);
+
+        Course course = courseRepository.findByCode(code)
+            .orElseThrow(() -> {
+                log.info("Course with Code {} not found", code);
+                return new ResponseStatusException(HttpStatus.NOT_FOUND, COURSE_NOT_FOUND_MESSAGE);
+            });
+
+        log.info("Course found: {}", course);
+
+        courseRepository.delete(course);
+
+        log.info("Course deleted successfully");
     }
 
 }

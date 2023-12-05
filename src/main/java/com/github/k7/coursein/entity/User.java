@@ -1,5 +1,9 @@
 package com.github.k7.coursein.entity;
 
+import com.github.k7.coursein.event.CreatedAtAware;
+import com.github.k7.coursein.event.UpdatedAtAware;
+import com.github.k7.coursein.listener.CreatedAtListener;
+import com.github.k7.coursein.listener.UpdatedAtListener;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -37,7 +42,11 @@ import java.util.stream.Collectors;
 @Table(name = "users")
 @ToString(exclude = {"roles", "courses", "orders"})
 @EqualsAndHashCode(exclude = {"roles", "courses", "orders"})
-public class User implements UserDetails {
+@EntityListeners({
+    CreatedAtListener.class,
+    UpdatedAtListener.class
+})
+public class User implements UserDetails, CreatedAtAware, UpdatedAtAware {
 
     @Id
     @GeneratedValue(strategy = javax.persistence.GenerationType.IDENTITY)
@@ -82,7 +91,7 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
-            .map(role -> new SimpleGrantedAuthority(role.getName().name()))
+            .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName().name()))
             .collect(Collectors.toSet());
     }
 

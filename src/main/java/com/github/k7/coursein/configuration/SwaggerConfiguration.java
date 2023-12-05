@@ -30,13 +30,13 @@ public class SwaggerConfiguration {
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
-                .select()
-                .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class))
-                .paths(PathSelectors.any())
-                .build()
-                .apiInfo(apiInfo())
-                .securityContexts(Collections.singletonList(securityContext()))
-                .securitySchemes(Collections.singletonList(apiKey()));
+            .select()
+            .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class))
+            .paths(PathSelectors.any())
+            .build()
+            .apiInfo(apiInfo())
+            .securityContexts(Collections.singletonList(securityContext()))
+            .securitySchemes(Collections.singletonList(apiKey()));
     }
 
     @Bean
@@ -46,14 +46,14 @@ public class SwaggerConfiguration {
 
     private ApiInfo apiInfo() {
         return new ApiInfo(
-                "BinarFud API",
-                "Binar Fud API Documentation",
-                "1.0",
-                "",
-                new Contact("Solahudin Al Malibari", "https://github.com/solahkay", ""),
-                "Creative Commons Attribution 4.0",
-                "https://creativecommons.org/licenses/by/4.0/",
-                Collections.emptyList()
+            "CourseIn API",
+            "Course API Documentation",
+            "1.0",
+            "",
+            new Contact("k7", "https://github.com/binar-final-project-kelompok7", ""),
+            "Creative Commons Attribution 4.0 International",
+            "https://creativecommons.org/licenses/by/4.0/",
+            Collections.emptyList()
         );
     }
 

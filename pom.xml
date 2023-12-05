@@ -10,7 +10,7 @@
     </parent>
     <groupId>k7</groupId>
     <artifactId>course-in</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <name>course-in</name>
     <description>CourseIn is a Project Submission for Binar Final Project</description>
     <properties>

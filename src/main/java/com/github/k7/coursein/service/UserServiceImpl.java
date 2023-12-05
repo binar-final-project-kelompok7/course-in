@@ -95,6 +95,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserResponse updateUser(String username, UpdateUserRequest request) {
         validationService.validate(request);
 
@@ -121,6 +122,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(String username, DeleteUserRequest request) {
         validationService.validate(request);
 

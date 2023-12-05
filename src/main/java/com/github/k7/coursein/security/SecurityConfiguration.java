@@ -1,8 +1,10 @@
 package com.github.k7.coursein.security;
 
+import com.github.k7.coursein.enums.UserRole;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -40,6 +42,11 @@ public class SecurityConfiguration {
             .csrf().disable()
             .authorizeRequests()
             .antMatchers(AUTH_WHITE_LIST).permitAll()
+            .antMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+            .antMatchers(HttpMethod.POST, "/api/v1/users/register").permitAll()
+            .antMatchers(HttpMethod.GET, "/api/v1/users/{username}").hasRole(UserRole.USER.name())
+            .antMatchers(HttpMethod.PATCH, "/api/v1/users/{username}").hasRole(UserRole.USER.name())
+            .antMatchers(HttpMethod.DELETE, "/api/v1/users/delete/{username}").hasRole(UserRole.USER.name())
             .antMatchers("/api/v1/**").permitAll()
             .anyRequest().authenticated()
             .and()

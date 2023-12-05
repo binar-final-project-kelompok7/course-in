@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -30,8 +29,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-@AutoConfigureMockMvc
-public class CourseServiceTest {
+class CourseServiceTest {
 
     @Mock
     ValidationService validationService;
@@ -42,14 +40,12 @@ public class CourseServiceTest {
     @InjectMocks
     private CourseServiceImpl courseService;
 
-    @Mock
-    private ValidationServiceImpl validationService;
-
     @Test
     void testGetCourse_success() {
-        when(courseRepository.findById(1L))
+        when(courseRepository.findByCode("WP1"))
             .thenReturn(Optional.ofNullable(Course.builder()
                 .id(1L)
+                .code("WP1")
                 .name("test")
                 .description("bla bla bla")
                 .price(50.0)
@@ -59,10 +55,10 @@ public class CourseServiceTest {
                 .level(CourseLevel.BEGINNER)
                 .build()));
 
-        CourseResponse result = courseService.getCourse(1L);
+        CourseResponse result = courseService.getCourse("WP1");
         Assertions.assertNotNull(result);
 
-        Mockito.verify(courseRepository, Mockito.times(1)).findById(1L);
+        Mockito.verify(courseRepository, Mockito.times(1)).findByCode("WP1");
     }
 
     @Test
@@ -71,6 +67,7 @@ public class CourseServiceTest {
 
         mockCourses.add(Course.builder()
             .id(1L)
+            .code("WP1")
             .name("Test 1")
             .description("Deskripsi test 1")
             .price(100.0)
@@ -82,6 +79,7 @@ public class CourseServiceTest {
 
         mockCourses.add(Course.builder()
             .id(2L)
+            .code("WP2")
             .name("Test 2")
             .description("Deskripsi test 2")
             .price(200.0)
@@ -105,17 +103,18 @@ public class CourseServiceTest {
     void testDeleteCourse_success() {
         Course mockCourse = Course.builder()
             .id(1L)
+            .code("WP1")
             .name("Test 1")
             .price(100.0)
             .link("http://inilink.com/test1")
             .category(CourseCategory.WEB_DEVELOPMENT)
             .build();
 
-        when(courseRepository.findById(1L)).thenReturn(java.util.Optional.of(mockCourse));
+        when(courseRepository.findByCode("WP1")).thenReturn(java.util.Optional.of(mockCourse));
 
-        courseService.deleteCourse(1L);
+        courseService.deleteCourse("WP1");
 
-        Mockito.verify(courseRepository, Mockito.times(1)).findById(1L);
+        Mockito.verify(courseRepository, Mockito.times(1)).findByCode("WP1");
         Mockito.verify(courseRepository, Mockito.times(1)).delete(mockCourse);
     }
 
@@ -126,11 +125,13 @@ public class CourseServiceTest {
             .name("")
             .build();
         Assertions.assertThrows(ConstraintViolationException.class, () -> validationService.validate(cr));
-      
+    }
+
     @Test
     void testUpdateCourse_success() {
         Course existingCourse = Course.builder()
             .id(1L)
+            .code("WP1")
             .name("Past Course")
             .description("test past description")
             .price(100.0)
@@ -153,14 +154,14 @@ public class CourseServiceTest {
 
         doNothing().when(validationService).validate(any(UpdateCourseRequest.class));
 
-        when(courseRepository.findById(1L)).thenReturn(Optional.of(existingCourse));
+        when(courseRepository.findByCode("WP1")).thenReturn(Optional.of(existingCourse));
         when(courseRepository.save(any(Course.class))).thenReturn(existingCourse);
 
-        CourseResponse courseResponse = courseService.updateCourse(1L, updateCourseRequest);
+        CourseResponse courseResponse = courseService.updateCourse("WP1", updateCourseRequest);
 
         Mockito.verify(courseRepository, Mockito.times(1)).findById(1L);
 
-        Assertions.assertEquals(1L, courseResponse.getId());
+        Assertions.assertEquals("WP1", courseResponse.getCode());
         Assertions.assertEquals(updateCourseRequest.getName(), courseResponse.getName());
         Assertions.assertEquals(updateCourseRequest.getDescription(), courseResponse.getDescription());
         Assertions.assertEquals(existingCourse.getPrice(), courseResponse.getPrice());

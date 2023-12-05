@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -16,9 +16,11 @@ import java.time.LocalDateTime;
 @Builder
 public class CourseResponse {
 
-    private Long id;
+    private String code;
 
     private String name;
+
+    private String author;
 
     private String description;
 
@@ -32,8 +34,10 @@ public class CourseResponse {
 
     private CourseLevel level;
 
-    private LocalDateTime createdAt;
+    private String createdAt;
 
-    private LocalDateTime updatedAt;
+    private String updatedAt;
+
+    private Set<String> intendeds;
 
 }

@@ -5,6 +5,7 @@ import com.github.k7.coursein.entity.User;
 import com.github.k7.coursein.enums.UserRole;
 import com.github.k7.coursein.model.DeleteUserRequest;
 import com.github.k7.coursein.model.RegisterUserRequest;
+import com.github.k7.coursein.model.UpdatePasswordUserRequest;
 import com.github.k7.coursein.model.UpdateUserRequest;
 import com.github.k7.coursein.model.UserResponse;
 import com.github.k7.coursein.repository.RoleRepository;
@@ -184,7 +185,7 @@ class UserServiceTest {
         UpdateUserRequest request = UpdateUserRequest.builder()
             .username("TestUserNew")
             .name("Test User New")
-            .password("PasswordNew")
+            .email("testuserupdate@example.com")
             .build();
 
         Set<Role> roles = new HashSet<>();
@@ -208,8 +209,8 @@ class UserServiceTest {
             .id(1L)
             .username(request.getUsername())
             .name(request.getName())
-            .email("testuser@example.com")
-            .password("EncodedPasswordNew")
+            .email("testuserupdate@example.com")
+            .password("EncodedPassword")
             .createdAt(TimeUtil.getFormattedLocalDateTimeNow())
             .updatedAt(TimeUtil.getFormattedLocalDateTimeNow())
             .roles(roles)
@@ -219,8 +220,6 @@ class UserServiceTest {
 
         when(userRepository.findByUsername(user.getUsername()))
             .thenReturn(Optional.of(user));
-        when(passwordEncoder.encode(request.getPassword()))
-            .thenReturn("EncodedPasswordNew");
         when(userRepository.save(updatedUser))
             .thenReturn(updatedUser);
 
@@ -230,7 +229,7 @@ class UserServiceTest {
 
         assertEquals(request.getUsername(), result.getUsername());
         assertEquals(request.getName(), result.getName());
-        assertEquals("testuser@example.com", result.getEmail());
+        assertEquals("testuserupdate@example.com", result.getEmail());
         assertEquals(TimeUtil.formatToString(updatedUser.getCreatedAt()), result.getCreatedAt());
         assertEquals(TimeUtil.formatToString(updatedUser.getUpdatedAt()), result.getUpdatedAt());
 
@@ -238,8 +237,6 @@ class UserServiceTest {
             .validate(request);
         verify(userRepository, times(1))
             .findByUsername("TestUser");
-        verify(passwordEncoder, times(1))
-            .encode(request.getPassword());
         verify(userRepository, times(1))
             .save(updatedUser);
     }
@@ -249,7 +246,7 @@ class UserServiceTest {
         UpdateUserRequest request = UpdateUserRequest.builder()
             .username("TestUserNew")
             .name("Test User New")
-            .password("PasswordNew")
+            .email("testuserupdate@example.com")
             .build();
 
         doNothing().when(validationService).validate(request);
@@ -263,7 +260,165 @@ class UserServiceTest {
         verify(userRepository, times(1))
             .findByUsername("TestUser");
         verify(passwordEncoder, times(0))
-            .encode(request.getPassword());
+            .encode(request.getEmail());
+        verify(userRepository, times(0))
+            .save(any(User.class));
+    }
+
+    @Test
+    void testUpdatePassword_Success() {
+        UpdatePasswordUserRequest request = UpdatePasswordUserRequest.builder()
+            .oldPassword("Password")
+            .newPassword("NewPassword")
+            .confirmNewPassword("NewPassword")
+            .build();
+
+        User user = User.builder()
+            .id(1L)
+            .username("TestUser")
+            .name("Test User")
+            .email("testuser@example.com")
+            .password("EncodedPassword")
+            .createdAt(TimeUtil.getFormattedLocalDateTimeNow())
+            .updatedAt(TimeUtil.getFormattedLocalDateTimeNow())
+            .build();
+
+        User updatedUser = User.builder()
+            .id(1L)
+            .username("TestUser")
+            .name("Test User")
+            .email("testuser@example.com")
+            .password("EncodedNewPassword")
+            .createdAt(TimeUtil.getFormattedLocalDateTimeNow())
+            .updatedAt(TimeUtil.getFormattedLocalDateTimeNow())
+            .build();
+
+        when(userRepository.findByUsername("TestUser"))
+            .thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(request.getOldPassword(), user.getPassword()))
+            .thenReturn(true);
+        when(passwordEncoder.encode(request.getNewPassword()))
+            .thenReturn("EncodedNewPassword");
+        when(userRepository.save(user))
+            .thenReturn(updatedUser);
+
+        doNothing().when(validationService).validate(request);
+
+        userService.updatePassword("TestUser", request);
+
+        verify(validationService, times(1))
+            .validate(request);
+        verify(userRepository, times(1))
+            .findByUsername("TestUser");
+        verify(passwordEncoder, times(1))
+            .matches(request.getOldPassword(), "EncodedPassword");
+        verify(passwordEncoder, times(1))
+            .encode(request.getNewPassword());
+        verify(userRepository, times(1))
+            .save(user);
+    }
+
+    @Test
+    void testUpdatePassword_FailedNotFound() {
+        UpdatePasswordUserRequest request = UpdatePasswordUserRequest.builder()
+            .oldPassword("Password")
+            .newPassword("NewPassword")
+            .confirmNewPassword("NewPassword")
+            .build();
+
+        when(userRepository.findByUsername("TestUser"))
+            .thenThrow(ResponseStatusException.class);
+
+        doNothing().when(validationService).validate(request);
+
+        assertThrows(ResponseStatusException.class, () -> userService.updatePassword("TestUser", request));
+
+        verify(validationService, times(1))
+            .validate(request);
+        verify(userRepository, times(1))
+            .findByUsername("TestUser");
+        verify(passwordEncoder, times(0))
+            .matches(any(String.class), any(String.class));
+        verify(passwordEncoder, times(0))
+            .encode(any(String.class));
+        verify(userRepository, times(0))
+            .save(any(User.class));
+    }
+
+    @Test
+    void testUpdatePassword_FailedInvalidPassword() {
+        UpdatePasswordUserRequest request = UpdatePasswordUserRequest.builder()
+            .oldPassword("Password")
+            .newPassword("NewPassword")
+            .confirmNewPassword("NewPassword")
+            .build();
+
+        User user = User.builder()
+            .id(1L)
+            .username("TestUser")
+            .name("Test User")
+            .email("testuser@example.com")
+            .password("EncodedPassword")
+            .createdAt(TimeUtil.getFormattedLocalDateTimeNow())
+            .updatedAt(TimeUtil.getFormattedLocalDateTimeNow())
+            .build();
+
+        when(userRepository.findByUsername("TestUser"))
+            .thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(request.getOldPassword(), user.getPassword()))
+            .thenThrow(ResponseStatusException.class);
+
+        doNothing().when(validationService).validate(request);
+
+        assertThrows(ResponseStatusException.class, () -> userService.updatePassword("TestUser", request));
+
+        verify(validationService, times(1))
+            .validate(request);
+        verify(userRepository, times(1))
+            .findByUsername("TestUser");
+        verify(passwordEncoder, times(1))
+            .matches(request.getOldPassword(), "EncodedPassword");
+        verify(passwordEncoder, times(0))
+            .encode(any(String.class));
+        verify(userRepository, times(0))
+            .save(any(User.class));
+    }
+
+    @Test
+    void testDeleteUser_FailedNewPasswordDoesntMatch() {
+        UpdatePasswordUserRequest request = UpdatePasswordUserRequest.builder()
+            .oldPassword("Password")
+            .newPassword("NewPassword")
+            .confirmNewPassword("NewPasswordWrong")
+            .build();
+
+        User user = User.builder()
+            .id(1L)
+            .username("TestUser")
+            .name("Test User")
+            .email("testuser@example.com")
+            .password("EncodedPassword")
+            .createdAt(TimeUtil.getFormattedLocalDateTimeNow())
+            .updatedAt(TimeUtil.getFormattedLocalDateTimeNow())
+            .build();
+
+        when(userRepository.findByUsername("TestUser"))
+            .thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(request.getOldPassword(), user.getPassword()))
+            .thenReturn(true);
+
+        doNothing().when(validationService).validate(request);
+
+        assertThrows(ResponseStatusException.class, () -> userService.updatePassword("TestUser", request));
+
+        verify(validationService, times(1))
+            .validate(request);
+        verify(userRepository, times(1))
+            .findByUsername("TestUser");
+        verify(passwordEncoder, times(1))
+            .matches(request.getOldPassword(), "EncodedPassword");
+        verify(passwordEncoder, times(0))
+            .encode(any(String.class));
         verify(userRepository, times(0))
             .save(any(User.class));
     }

@@ -3,10 +3,7 @@ package com.github.k7.coursein.service;
 import com.github.k7.coursein.entity.Role;
 import com.github.k7.coursein.entity.User;
 import com.github.k7.coursein.enums.UserRole;
-import com.github.k7.coursein.model.DeleteUserRequest;
-import com.github.k7.coursein.model.RegisterUserRequest;
-import com.github.k7.coursein.model.UpdateUserRequest;
-import com.github.k7.coursein.model.UserResponse;
+import com.github.k7.coursein.model.*;
 import com.github.k7.coursein.repository.RoleRepository;
 import com.github.k7.coursein.repository.UserRepository;
 import com.github.k7.coursein.util.TimeUtil;
@@ -110,8 +107,8 @@ public class UserServiceImpl implements UserService {
             user.setName(request.getName());
         }
 
-        if (Objects.nonNull(request.getPassword())) {
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        if (Objects.nonNull(request.getEmail())) {
+            user.setEmail(request.getEmail());
         }
 
         userRepository.save(user);
@@ -119,6 +116,26 @@ public class UserServiceImpl implements UserService {
         log.info("Update user success with username : {}", username);
 
         return toUserResponse(user);
+    }
+
+    @Override
+    public void updatePassword(String username, UpdatePasswordUserRequest request) {
+        validationService.validate(request);
+
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid password");
+        }
+
+        if (!Objects.equals(request.getNewPassword(), request.getConfirmNewPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password cannot be same as old password");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        userRepository.save(user);
     }
 
     @Override

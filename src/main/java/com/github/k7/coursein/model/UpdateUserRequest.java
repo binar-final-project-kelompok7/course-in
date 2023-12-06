@@ -20,6 +20,6 @@ public class UpdateUserRequest {
     private String name;
 
     @Size(max = 100)
-    private String password;
+    private String email;
 
 }

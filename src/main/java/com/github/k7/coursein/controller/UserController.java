@@ -2,6 +2,7 @@ package com.github.k7.coursein.controller;
 
 import com.github.k7.coursein.model.DeleteUserRequest;
 import com.github.k7.coursein.model.RegisterUserRequest;
+import com.github.k7.coursein.model.UpdatePasswordUserRequest;
 import com.github.k7.coursein.model.UpdateUserRequest;
 import com.github.k7.coursein.model.UserResponse;
 import com.github.k7.coursein.model.WebResponse;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -70,6 +72,20 @@ public class UserController {
             .code(HttpStatus.OK.value())
             .message(HttpStatus.OK.getReasonPhrase())
             .data(userResponse)
+            .build();
+    }
+
+    @PutMapping(
+        path = "/update-password/{username}",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public WebResponse<String> updatePassword(@PathVariable("username") String username,
+                                              @RequestBody UpdatePasswordUserRequest request) {
+        userService.updatePassword(username, request);
+        return WebResponse.<String>builder()
+            .code(HttpStatus.OK.value())
+            .message(HttpStatus.OK.getReasonPhrase())
             .build();
     }
 

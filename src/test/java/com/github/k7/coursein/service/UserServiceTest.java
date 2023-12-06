@@ -220,6 +220,8 @@ class UserServiceTest {
 
         when(userRepository.findByUsername(user.getUsername()))
             .thenReturn(Optional.of(user));
+        when(userRepository.existsByUsernameOrEmail(null, request.getEmail()))
+            .thenReturn(false);
         when(userRepository.save(updatedUser))
             .thenReturn(updatedUser);
 
@@ -238,20 +240,23 @@ class UserServiceTest {
         verify(userRepository, times(1))
             .findByUsername("TestUser");
         verify(userRepository, times(1))
+            .existsByUsernameOrEmail(null, request.getEmail());
+        verify(userRepository, times(1))
             .save(updatedUser);
     }
 
     @Test
-    void testUpdateUser_Failed() {
+    void testUpdateUser_FailedUserNotFound() {
         UpdateUserRequest request = UpdateUserRequest.builder()
             .username("TestUserNew")
             .name("Test User New")
             .email("testuserupdate@example.com")
             .build();
 
-        doNothing().when(validationService).validate(request);
         when(userRepository.findByUsername("TestUser"))
             .thenThrow(ResponseStatusException.class);
+
+        doNothing().when(validationService).validate(request);
 
         assertThrows(ResponseStatusException.class, () -> userService.updateUser("TestUser", request));
 
@@ -259,6 +264,54 @@ class UserServiceTest {
             .validate(request);
         verify(userRepository, times(1))
             .findByUsername("TestUser");
+        verify(userRepository, times(0))
+            .existsByUsernameOrEmail(null, request.getEmail());
+        verify(passwordEncoder, times(0))
+            .encode(request.getEmail());
+        verify(userRepository, times(0))
+            .save(any(User.class));
+    }
+
+    @Test
+    void testUpdateUser_FailedEmailAlreadyExists() {
+        UpdateUserRequest request = UpdateUserRequest.builder()
+            .username("TestUserNew")
+            .name("Test User New")
+            .email("testuserupdate@example.com")
+            .build();
+
+        Set<Role> roles = new HashSet<>();
+        Role role = new Role();
+        role.setName(UserRole.USER);
+
+        roles.add(role);
+
+        User user = User.builder()
+            .id(1L)
+            .username("TestUser")
+            .name("Test User")
+            .email("testuser@example.com")
+            .password("EncodedPassword")
+            .createdAt(TimeUtil.getFormattedLocalDateTimeNow())
+            .updatedAt(TimeUtil.getFormattedLocalDateTimeNow())
+            .roles(roles)
+            .build();
+
+        when(userRepository.findByUsername("TestUser"))
+            .thenReturn(Optional.of(user));
+        when(userRepository.existsByUsernameOrEmail(null, request.getEmail()))
+            .thenReturn(true);
+
+        doNothing().when(validationService).validate(request);
+
+        assertThrows(ResponseStatusException.class, () -> userService.updateUser("TestUser", request));
+
+        verify(validationService, times(1))
+            .validate(request);
+        verify(userRepository, times(1))
+            .findByUsername("TestUser");
+        verify(userRepository, times(1))
+            .existsByUsernameOrEmail(null, request.getEmail());
         verify(passwordEncoder, times(0))
             .encode(request.getEmail());
         verify(userRepository, times(0))

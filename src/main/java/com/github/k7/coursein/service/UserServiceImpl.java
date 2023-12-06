@@ -108,6 +108,10 @@ public class UserServiceImpl implements UserService {
         }
 
         if (Objects.nonNull(request.getEmail())) {
+            if (userRepository.existsByUsernameOrEmail(null, request.getEmail())) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists!");
+            }
+
             user.setEmail(request.getEmail());
         }
 

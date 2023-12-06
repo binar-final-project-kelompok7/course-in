@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
@@ -13,22 +12,18 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RegisterUserRequest {
-
-    @NotBlank
-    @Size(max = 50)
-    private String username;
-
-    @Size(max = 100)
-    private String name;
-
-    @NotBlank
-    @Email
-    @Size(max = 100)
-    private String email;
+public class UpdatePasswordUserRequest {
 
     @NotBlank
     @Size(min = 8, max = 100)
-    private String password;
+    private String oldPassword;
+
+    @NotBlank
+    @Size(min = 8, max = 100)
+    private String newPassword;
+
+    @NotBlank
+    @Size(min = 8, max = 100)
+    private String confirmNewPassword;
 
 }

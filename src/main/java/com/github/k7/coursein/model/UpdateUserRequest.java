@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.Size;
 
 @Data
@@ -20,6 +21,7 @@ public class UpdateUserRequest {
     private String name;
 
     @Size(max = 100)
+    @Email
     private String email;
 
 }

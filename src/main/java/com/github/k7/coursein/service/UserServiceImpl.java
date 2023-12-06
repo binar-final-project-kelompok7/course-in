@@ -123,6 +123,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void updatePassword(String username, UpdatePasswordUserRequest request) {
         validationService.validate(request);
 

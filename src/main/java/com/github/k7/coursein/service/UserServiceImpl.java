@@ -138,4 +138,9 @@ public class UserServiceImpl implements UserService {
         log.info("Delete user success with username : {}", username);
     }
 
+    @Override
+    public Long numberOfUser() {
+        return userRepository.count();
+    }
+
 }

@@ -15,4 +15,6 @@ public interface UserService {
 
     void deleteUser(String username, DeleteUserRequest request);
 
+    Long numberOfUser();
+
 }

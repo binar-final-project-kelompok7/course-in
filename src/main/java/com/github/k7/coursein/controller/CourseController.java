@@ -1,5 +1,8 @@
 package com.github.k7.coursein.controller;
 
+import com.github.k7.coursein.enums.CourseCategory;
+import com.github.k7.coursein.enums.CourseLevel;
+import com.github.k7.coursein.enums.CourseType;
 import com.github.k7.coursein.model.AddCourseRequest;
 import com.github.k7.coursein.model.CourseResponse;
 import com.github.k7.coursein.model.PagingResponse;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
@@ -77,6 +81,103 @@ public class CourseController {
             .build();
     }
 
+    @GetMapping(
+        path = "/filtered",
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public WebResponse<List<CourseResponse>> filterAllCourse(
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "size", defaultValue = "10") int size,
+        @RequestParam(name = "filter") String[] filters,
+        @RequestParam(name = "category", required = false) List<String> category,
+        @RequestParam(name = "level", required = false) List<String> levels,
+        @RequestParam(name = "type", required = false) String type
+    ) {
+
+        Page<CourseResponse> filteredCourse = courseService.filterAllCourses(
+            page,
+            size,
+            filters);
+
+        if (category != null && levels == null && type == null) {
+            filteredCourse = courseService.filterAllCourses(
+                page,
+                size,
+                filters,
+                category.stream().map(CourseCategory::valueOf).collect(Collectors.toList())
+            );
+        }
+
+        if (category == null && levels != null && type == null) {
+            filteredCourse = courseService.filterAllCourses1(
+                page,
+                size,
+                filters,
+                levels.stream().map(CourseLevel::valueOf).collect(Collectors.toList())
+            );
+        }
+
+        if (category == null && levels == null && type != null) {
+            filteredCourse = courseService.filterAllCourses2(
+                page,
+                size,
+                filters,
+                CourseType.valueOf(type));
+        }
+
+        if (category != null && levels != null && type == null) {
+            filteredCourse = courseService.filterAllCourses(
+                page,
+                size,
+                filters,
+                category.stream().map(CourseCategory::valueOf).collect(Collectors.toList()),
+                levels.stream().map(CourseLevel::valueOf).collect(Collectors.toList())
+            );
+        }
+
+        if (category != null && levels == null && type != null) {
+            filteredCourse = courseService.filterAllCourses2(
+                page,
+                size,
+                filters,
+                CourseType.valueOf(type),
+                category.stream().map(CourseCategory::valueOf).collect(Collectors.toList())
+            );
+        }
+
+        if (category == null && levels != null && type != null) {
+            filteredCourse = courseService.filterAllCourses1(
+                page,
+                size,
+                filters,
+                levels.stream().map(CourseLevel::valueOf).collect(Collectors.toList()),
+                CourseType.valueOf(type)
+            );
+        }
+
+        if (category != null && levels != null && type != null) {
+            filteredCourse = courseService.filterAllCourses(
+                page,
+                size,
+                filters,
+                category.stream().map(CourseCategory::valueOf).collect(Collectors.toList()),
+                levels.stream().map(CourseLevel::valueOf).collect(Collectors.toList()),
+                CourseType.valueOf(type)
+            );
+        }
+
+        return WebResponse.<List<CourseResponse>>builder()
+            .code(HttpStatus.OK.value())
+            .message(HttpStatus.OK.getReasonPhrase())
+            .data(filteredCourse.getContent())
+            .paging(PagingResponse.builder()
+                .currentPage(filteredCourse.getNumber())
+                .totalPage(filteredCourse.getTotalPages())
+                .size(filteredCourse.getSize())
+                .build())
+            .build();
+    }
+
     @PatchMapping(
         path = "/{courseCode}",
         consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -99,6 +200,28 @@ public class CourseController {
     public WebResponse<String> deleteCourse(@PathVariable("courseCode") String courseCode) {
         courseService.deleteCourse(courseCode);
         return WebResponse.<String>builder()
+            .code(HttpStatus.OK.value())
+            .message(HttpStatus.OK.getReasonPhrase())
+            .build();
+    }
+
+    @GetMapping(
+        path = "/count-course",
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public WebResponse<Long> numberOfCourse(
+        @RequestParam(name = "type", required = false) String type
+    ) {
+        if (type == null) {
+            return WebResponse.<Long>builder()
+                .data(courseService.numberOfCourse(null))
+                .code(HttpStatus.OK.value())
+                .message(HttpStatus.OK.getReasonPhrase())
+                .build();
+        }
+
+        return WebResponse.<Long>builder()
+            .data(courseService.numberOfCourse(CourseType.valueOf(type)))
             .code(HttpStatus.OK.value())
             .message(HttpStatus.OK.getReasonPhrase())
             .build();

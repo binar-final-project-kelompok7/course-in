@@ -2,6 +2,8 @@ package com.github.k7.coursein.service;
 
 import com.github.k7.coursein.entity.Course;
 import com.github.k7.coursein.entity.Intended;
+import com.github.k7.coursein.enums.CourseCategory;
+import com.github.k7.coursein.enums.CourseLevel;
 import com.github.k7.coursein.enums.CourseType;
 import com.github.k7.coursein.model.AddCourseRequest;
 import com.github.k7.coursein.model.CourseResponse;
@@ -13,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -134,6 +137,94 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Page<CourseResponse> filterAllCourses(int page, int size, String[] filters) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(filters).descending());
+        Page<Course> allCoursesPage = courseRepository.findAll(pageRequest);
+        List<CourseResponse> courseResponses = allCoursesPage.getContent().stream()
+            .map(CourseServiceImpl::toCourseResponse)
+            .collect(Collectors.toList());
+        return new PageImpl<>(courseResponses, pageRequest, allCoursesPage.getTotalElements());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CourseResponse> filterAllCourses(int page, int size, String[] filters, List<CourseCategory> courseCategories) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(filters).descending());
+        Page<Course> allCoursesPage = courseRepository.findAllByCategoryIn(courseCategories, pageRequest);
+        List<CourseResponse> courseResponses = allCoursesPage.getContent().stream()
+            .map(CourseServiceImpl::toCourseResponse)
+            .collect(Collectors.toList());
+        return new PageImpl<>(courseResponses, pageRequest, allCoursesPage.getTotalElements());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CourseResponse> filterAllCourses(int page, int size, String[] filters, List<CourseCategory> courseCategories, List<CourseLevel> courseLevels) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(filters).descending());
+        Page<Course> allCoursesPage = courseRepository.findAllByCategoryInAndLevelIn(courseCategories, courseLevels, pageRequest);
+        List<CourseResponse> courseResponses = allCoursesPage.getContent().stream()
+            .map(CourseServiceImpl::toCourseResponse)
+            .collect(Collectors.toList());
+        return new PageImpl<>(courseResponses, pageRequest, allCoursesPage.getTotalElements());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CourseResponse> filterAllCourses(int page, int size, String[] filters, List<CourseCategory> courseCategories, List<CourseLevel> courseLevels, CourseType courseType) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(filters).descending());
+        Page<Course> allCoursesPage = courseRepository.findAllByCategoryInAndLevelInAndType(courseCategories, courseLevels, courseType, pageRequest);
+        List<CourseResponse> courseResponses = allCoursesPage.getContent().stream()
+            .map(CourseServiceImpl::toCourseResponse)
+            .collect(Collectors.toList());
+        return new PageImpl<>(courseResponses, pageRequest, allCoursesPage.getTotalElements());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CourseResponse> filterAllCourses1(int page, int size, String[] filters, List<CourseLevel> courseLevels) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(filters).descending());
+        Page<Course> allCoursesPage = courseRepository.findAllByLevelIn(courseLevels, pageRequest);
+        List<CourseResponse> courseResponses = allCoursesPage.getContent().stream()
+            .map(CourseServiceImpl::toCourseResponse)
+            .collect(Collectors.toList());
+        return new PageImpl<>(courseResponses, pageRequest, allCoursesPage.getTotalElements());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CourseResponse> filterAllCourses1(int page, int size, String[] filters, List<CourseLevel> courseLevels, CourseType courseType) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(filters).descending());
+        Page<Course> allCoursesPage = courseRepository.findAllByLevelInAndType(courseLevels, courseType, pageRequest);
+        List<CourseResponse> courseResponses = allCoursesPage.getContent().stream()
+            .map(CourseServiceImpl::toCourseResponse)
+            .collect(Collectors.toList());
+        return new PageImpl<>(courseResponses, pageRequest, allCoursesPage.getTotalElements());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CourseResponse> filterAllCourses2(int page, int size, String[] filters, CourseType courseType) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(filters).descending());
+        Page<Course> allCoursesPage = courseRepository.findAllByType(courseType, pageRequest);
+        List<CourseResponse> courseResponses = allCoursesPage.getContent().stream()
+            .map(CourseServiceImpl::toCourseResponse)
+            .collect(Collectors.toList());
+        return new PageImpl<>(courseResponses, pageRequest, allCoursesPage.getTotalElements());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CourseResponse> filterAllCourses2(int page, int size, String[] filters, CourseType courseType, List<CourseCategory> courseCategories) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(filters).descending());
+        Page<Course> allCoursesPage = courseRepository.findAllByCategoryInAndType(courseCategories, courseType, pageRequest);
+        List<CourseResponse> courseResponses = allCoursesPage.getContent().stream()
+            .map(CourseServiceImpl::toCourseResponse)
+            .collect(Collectors.toList());
+        return new PageImpl<>(courseResponses, pageRequest, allCoursesPage.getTotalElements());
+    }
+
+    @Override
     @Transactional
     public CourseResponse updateCourse(String code, UpdateCourseRequest request) {
         validationService.validate(request);
@@ -238,6 +329,14 @@ public class CourseServiceImpl implements CourseService {
         courseRepository.delete(course);
 
         log.info("Course deleted successfully");
+    }
+
+    @Override
+    public Long numberOfCourse(CourseType courseType) {
+        if (courseType == null) {
+            return courseRepository.count();
+        }
+        return courseRepository.countByType(courseType);
     }
 
 }

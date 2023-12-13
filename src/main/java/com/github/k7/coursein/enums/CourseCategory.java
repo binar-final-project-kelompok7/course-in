@@ -7,6 +7,8 @@ public enum CourseCategory {
     WEB_DEVELOPMENT,
     ANDROID_DEVELOPMENT,
     IOS_DEVELOPMENT,
+    DATA_SCIENCE,
+    BUSINESS_INTELLIGENCE,
     OTHER
 
 }

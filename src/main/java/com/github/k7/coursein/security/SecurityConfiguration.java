@@ -40,6 +40,8 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf().disable()
+            .cors()
+            .and()
             .authorizeRequests()
             .antMatchers(AUTH_WHITE_LIST).permitAll()
             .antMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()

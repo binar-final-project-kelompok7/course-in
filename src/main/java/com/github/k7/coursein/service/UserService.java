@@ -14,4 +14,6 @@ public interface UserService {
 
     void deleteUser(String username, DeleteUserRequest request);
 
+    long countUser();
+
 }

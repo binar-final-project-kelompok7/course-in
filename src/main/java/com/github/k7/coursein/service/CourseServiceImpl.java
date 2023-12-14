@@ -351,4 +351,19 @@ public class CourseServiceImpl implements CourseService {
         log.info("Course deleted successfully");
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public long countCourse() {
+        return courseRepository.count();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countPremiumCourse() {
+        List<Course> courses = courseRepository.findAll();
+        return courses.stream()
+            .filter(course -> course.getType().equals(CourseType.PREMIUM))
+            .count();
+    }
+
 }

@@ -27,4 +27,8 @@ public interface CourseService {
 
     void deleteCourse(String code);
 
+    long countCourse();
+
+    long countPremiumCourse();
+
 }

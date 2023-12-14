@@ -103,4 +103,17 @@ public class UserController {
             .build();
     }
 
+    @GetMapping(
+        path = "/count",
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public WebResponse<Long> countUser() {
+        long count = userService.countUser();
+        return WebResponse.<Long>builder()
+            .code(HttpStatus.OK.value())
+            .message(HttpStatus.OK.getReasonPhrase())
+            .data(count)
+            .build();
+    }
+
 }

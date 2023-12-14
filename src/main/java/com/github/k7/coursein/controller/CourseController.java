@@ -113,4 +113,30 @@ public class CourseController {
             .build();
     }
 
+    @GetMapping(
+        path = "/count",
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public WebResponse<Long> countCourse() {
+        long count = courseService.countCourse();
+        return WebResponse.<Long>builder()
+            .code(HttpStatus.OK.value())
+            .message(HttpStatus.OK.getReasonPhrase())
+            .data(count)
+            .build();
+    }
+
+    @GetMapping(
+        path = "/count/premium",
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public WebResponse<Long> countPremiumCourse() {
+        long count = courseService.countPremiumCourse();
+        return WebResponse.<Long>builder()
+            .code(HttpStatus.OK.value())
+            .message(HttpStatus.OK.getReasonPhrase())
+            .data(count)
+            .build();
+    }
+
 }

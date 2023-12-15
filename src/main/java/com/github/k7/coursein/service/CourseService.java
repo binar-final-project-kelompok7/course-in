@@ -18,21 +18,7 @@ public interface CourseService {
 
     Page<CourseResponse> getAllCourse(int page, int size);
 
-    Page<CourseResponse> filterAllCourses(int page, int size, String[] filters);
-
-    Page<CourseResponse> filterAllCourses(int page, int size, String[] filters, List<CourseCategory> courseCategories);
-
-    Page<CourseResponse> filterAllCourses(int page, int size, String[] filters, List<CourseCategory> courseCategories, List<CourseLevel> courseLevels);
-
-    Page<CourseResponse> filterAllCourses(int page, int size, String[] filters, List<CourseCategory> courseCategories, List<CourseLevel> courseLevels, CourseType courseType);
-
-    Page<CourseResponse> filterAllCourses1(int page, int size, String[] filters, List<CourseLevel> courseLevels);
-
-    Page<CourseResponse> filterAllCourses1(int page, int size, String[] filters, List<CourseLevel> courseLevels, CourseType courseType);
-
-    Page<CourseResponse> filterAllCourses2(int page, int size, String[] filters, CourseType courseType);
-
-    Page<CourseResponse> filterAllCourses2(int page, int size, String[] filters, CourseType courseType, List<CourseCategory> courseCategories);
+    Page<CourseResponse> filterAllCourses(int page, int size, String[] filters, List<CourseCategory> categories, List<CourseLevel> levels, CourseType type);
 
     CourseResponse updateCourse(String code, UpdateCourseRequest request);
 

@@ -21,27 +21,5 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     boolean existsByNameOrLink(String name, String link);
 
-    Page<Course> findAllByCategoryIn(List<CourseCategory> courseCategory, Pageable pageable);
-
-    Page<Course> findAllByLevelIn(List<CourseLevel> courseLevels, Pageable pageable);
-
-    Page<Course> findAllByType(CourseType courseType, Pageable pageable);
-
-    Page<Course> findAllByCategoryInAndLevelIn(List<CourseCategory> courseCategory,
-                                               List<CourseLevel> courseLevels,
-                                               Pageable pageable);
-
-    Page<Course> findAllByCategoryInAndType(List<CourseCategory> courseCategory,
-                                            CourseType courseType,
-                                            Pageable pageable);
-
-    Page<Course> findAllByLevelInAndType(List<CourseLevel> courseLevels,
-                                         CourseType courseType,
-                                         Pageable pageable);
-
-    Page<Course> findAllByCategoryInAndLevelInAndType(List<CourseCategory> courseCategory,
-                                                      List<CourseLevel> courseLevels,
-                                                      CourseType courseType, Pageable pageable);
-
     Long countByType(CourseType courseType);
 }

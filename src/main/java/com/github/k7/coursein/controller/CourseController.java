@@ -88,83 +88,19 @@ public class CourseController {
     public WebResponse<List<CourseResponse>> filterAllCourse(
         @RequestParam(name = "page", defaultValue = "0") int page,
         @RequestParam(name = "size", defaultValue = "10") int size,
-        @RequestParam(name = "filter") String[] filters,
-        @RequestParam(name = "category", required = false) List<String> category,
-        @RequestParam(name = "level", required = false) List<String> levels,
-        @RequestParam(name = "type", required = false) String type
+        @RequestParam(name = "filter") List<String> filters,
+        @RequestParam(name = "category", required = false) List<CourseCategory> category,
+        @RequestParam(name = "level", required = false) List<CourseLevel> levels,
+        @RequestParam(name = "type", required = false) CourseType type
     ) {
 
         Page<CourseResponse> filteredCourse = courseService.filterAllCourses(
             page,
             size,
-            filters);
-
-        if (category != null && levels == null && type == null) {
-            filteredCourse = courseService.filterAllCourses(
-                page,
-                size,
-                filters,
-                category.stream().map(CourseCategory::valueOf).collect(Collectors.toList())
-            );
-        }
-
-        if (category == null && levels != null && type == null) {
-            filteredCourse = courseService.filterAllCourses1(
-                page,
-                size,
-                filters,
-                levels.stream().map(CourseLevel::valueOf).collect(Collectors.toList())
-            );
-        }
-
-        if (category == null && levels == null && type != null) {
-            filteredCourse = courseService.filterAllCourses2(
-                page,
-                size,
-                filters,
-                CourseType.valueOf(type));
-        }
-
-        if (category != null && levels != null && type == null) {
-            filteredCourse = courseService.filterAllCourses(
-                page,
-                size,
-                filters,
-                category.stream().map(CourseCategory::valueOf).collect(Collectors.toList()),
-                levels.stream().map(CourseLevel::valueOf).collect(Collectors.toList())
-            );
-        }
-
-        if (category != null && levels == null && type != null) {
-            filteredCourse = courseService.filterAllCourses2(
-                page,
-                size,
-                filters,
-                CourseType.valueOf(type),
-                category.stream().map(CourseCategory::valueOf).collect(Collectors.toList())
-            );
-        }
-
-        if (category == null && levels != null && type != null) {
-            filteredCourse = courseService.filterAllCourses1(
-                page,
-                size,
-                filters,
-                levels.stream().map(CourseLevel::valueOf).collect(Collectors.toList()),
-                CourseType.valueOf(type)
-            );
-        }
-
-        if (category != null && levels != null && type != null) {
-            filteredCourse = courseService.filterAllCourses(
-                page,
-                size,
-                filters,
-                category.stream().map(CourseCategory::valueOf).collect(Collectors.toList()),
-                levels.stream().map(CourseLevel::valueOf).collect(Collectors.toList()),
-                CourseType.valueOf(type)
-            );
-        }
+            filters.toArray(new String[0]),
+            category,
+            levels,
+            type);
 
         return WebResponse.<List<CourseResponse>>builder()
             .code(HttpStatus.OK.value())

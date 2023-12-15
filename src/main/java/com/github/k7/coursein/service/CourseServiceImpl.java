@@ -118,23 +118,9 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<CourseResponse> getAllCourse(int page, int size) {
+    public Page<CourseResponse> getAllCourse(int page, int size, String[] filters, List<CourseCategory> categories, List<CourseLevel> levels, CourseType type) {
         log.info("Fetching all available courses. Page: {}, Size: {}", page, size);
 
-        PageRequest pageRequest = PageRequest.of(page, size);
-        Page<Course> allCoursesPage = courseRepository.findAll(pageRequest);
-
-        List<CourseResponse> courseResponses = allCoursesPage.getContent().stream()
-            .map(CourseServiceImpl::toCourseResponse)
-            .collect(Collectors.toList());
-
-        log.info("Returning {} courses on page {} of size {}", courseResponses.size(), page, size);
-
-        return new PageImpl<>(courseResponses, pageRequest, allCoursesPage.getTotalElements());
-    }
-
-    @Override
-    public Page<CourseResponse> filterAllCourses(int page, int size, String[] filters, List<CourseCategory> categories, List<CourseLevel> levels, CourseType type) {
         PageRequest pageRequest = PageRequest.of(page, size);
 
         List<Course> filteredCourse = new ArrayList<>();

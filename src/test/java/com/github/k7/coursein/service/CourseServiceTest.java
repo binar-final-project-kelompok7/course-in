@@ -93,7 +93,7 @@ class CourseServiceTest {
 
         when(courseRepository.findAll(any(PageRequest.class))).thenReturn(mockPage);
 
-        Page<CourseResponse> resultPage = courseService.getAllCourse(0, 8);
+        Page<CourseResponse> resultPage = courseService.getAllCourse(0, 8, null, null, null, null);
         Assertions.assertEquals(mockCourses.size(), resultPage.getContent().size());
 
         Mockito.verify(courseRepository).findAll(PageRequest.of(0, 8));

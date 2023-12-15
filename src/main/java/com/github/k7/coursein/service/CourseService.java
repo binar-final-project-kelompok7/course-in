@@ -16,9 +16,7 @@ public interface CourseService {
 
     CourseResponse getCourse(String code);
 
-    Page<CourseResponse> getAllCourse(int page, int size);
-
-    Page<CourseResponse> filterAllCourses(int page, int size, String[] filters, List<CourseCategory> categories, List<CourseLevel> levels, CourseType type);
+    Page<CourseResponse> getAllCourse(int page, int size, String[] filters, List<CourseCategory> categories, List<CourseLevel> levels, CourseType type);
 
     CourseResponse updateCourse(String code, UpdateCourseRequest request);
 

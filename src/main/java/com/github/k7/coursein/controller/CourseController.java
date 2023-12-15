@@ -66,9 +66,19 @@ public class CourseController {
     )
     public WebResponse<List<CourseResponse>> getAllCourse(
         @RequestParam(name = "page", defaultValue = "0") int page,
-        @RequestParam(name = "size", defaultValue = "10") int size
+        @RequestParam(name = "size", defaultValue = "10") int size,
+        @RequestParam(name = "filter", required = false) List<String> filters,
+        @RequestParam(name = "category", required = false) List<CourseCategory> category,
+        @RequestParam(name = "level", required = false) List<CourseLevel> levels,
+        @RequestParam(name = "type", required = false) CourseType type
     ) {
-        Page<CourseResponse> allCourse = courseService.getAllCourse(page, size);
+        Page<CourseResponse> allCourse = courseService.getAllCourse(
+            page,
+            size,
+            filters.toArray(new String[0]),
+            category,
+            levels,
+            type);
         return WebResponse.<List<CourseResponse>>builder()
             .code(HttpStatus.OK.value())
             .message(HttpStatus.OK.getReasonPhrase())
@@ -77,39 +87,6 @@ public class CourseController {
                 .currentPage(allCourse.getNumber())
                 .totalPage(allCourse.getTotalPages())
                 .size(allCourse.getSize())
-                .build())
-            .build();
-    }
-
-    @GetMapping(
-        path = "/filtered",
-        produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public WebResponse<List<CourseResponse>> filterAllCourse(
-        @RequestParam(name = "page", defaultValue = "0") int page,
-        @RequestParam(name = "size", defaultValue = "10") int size,
-        @RequestParam(name = "filter") List<String> filters,
-        @RequestParam(name = "category", required = false) List<CourseCategory> category,
-        @RequestParam(name = "level", required = false) List<CourseLevel> levels,
-        @RequestParam(name = "type", required = false) CourseType type
-    ) {
-
-        Page<CourseResponse> filteredCourse = courseService.filterAllCourses(
-            page,
-            size,
-            filters.toArray(new String[0]),
-            category,
-            levels,
-            type);
-
-        return WebResponse.<List<CourseResponse>>builder()
-            .code(HttpStatus.OK.value())
-            .message(HttpStatus.OK.getReasonPhrase())
-            .data(filteredCourse.getContent())
-            .paging(PagingResponse.builder()
-                .currentPage(filteredCourse.getNumber())
-                .totalPage(filteredCourse.getTotalPages())
-                .size(filteredCourse.getSize())
                 .build())
             .build();
     }

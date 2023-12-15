@@ -76,6 +76,7 @@ public class SecurityBeanConfiguration {
                     .allowedOrigins(allowedOrigins.toArray(new String[10]))
                     .allowedMethods("GET", "POST", "PUT", "DELETE")
                     .allowedHeaders("*")
+                    .exposedHeaders("Authorization")
                     .allowCredentials(true);
             }
         };

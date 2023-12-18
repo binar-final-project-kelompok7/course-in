@@ -75,11 +75,10 @@ public class SecurityBeanConfiguration {
                 log.info("CORS allowed origins : {}", allowedOrigins);
                 registry.addMapping("/**")
                     .allowedOrigins(allowedOrigins.toArray(new String[10]))
+                    .allowedOrigins("http://localhost:5173")
                     .allowedMethods("GET", "POST", "PUT", "DELETE")
                     .allowedHeaders("*")
-                    .exposedHeaders(
-                        HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
-                        HttpHeaders.AUTHORIZATION)
+                    .exposedHeaders(HttpHeaders.AUTHORIZATION)
                     .allowCredentials(true);
             }
         };

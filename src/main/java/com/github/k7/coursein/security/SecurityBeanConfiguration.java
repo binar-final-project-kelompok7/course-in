@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -76,7 +77,9 @@ public class SecurityBeanConfiguration {
                     .allowedOrigins(allowedOrigins.toArray(new String[10]))
                     .allowedMethods("GET", "POST", "PUT", "DELETE")
                     .allowedHeaders("*")
-                    .exposedHeaders("Authorization")
+                    .exposedHeaders(
+                        HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
+                        HttpHeaders.AUTHORIZATION)
                     .allowCredentials(true);
             }
         };

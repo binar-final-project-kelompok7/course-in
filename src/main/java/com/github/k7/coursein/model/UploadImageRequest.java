@@ -4,23 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserResponse {
+public class UploadImageRequest {
 
-    private String username;
+    private MultipartFile multipartFile;
 
-    private String email;
-
-    private String name;
-
-    private String pictLink;
-
-    private String createdAt;
-
-    private String updatedAt;
-
+    private String uploader;
 }

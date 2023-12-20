@@ -3,10 +3,7 @@ package com.github.k7.coursein.service;
 import com.github.k7.coursein.entity.Role;
 import com.github.k7.coursein.entity.User;
 import com.github.k7.coursein.enums.UserRole;
-import com.github.k7.coursein.model.DeleteUserRequest;
-import com.github.k7.coursein.model.RegisterUserRequest;
-import com.github.k7.coursein.model.UpdateUserRequest;
-import com.github.k7.coursein.model.UserResponse;
+import com.github.k7.coursein.model.*;
 import com.github.k7.coursein.repository.RoleRepository;
 import com.github.k7.coursein.repository.UserRepository;
 import com.github.k7.coursein.util.TimeUtil;
@@ -17,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -37,6 +35,9 @@ public class UserServiceImpl implements UserService {
     private final ValidationService validationService;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final CloudinaryService cloudinaryService;
+
 
     private static final String USER_NOT_FOUND = "User not found!";
 
@@ -89,6 +90,7 @@ public class UserServiceImpl implements UserService {
             .username(user.getUsername())
             .name(user.getName())
             .email(user.getEmail())
+            .pictLink(user.getProfilePicture())
             .createdAt(TimeUtil.formatToString(user.getCreatedAt()))
             .updatedAt(TimeUtil.formatToString(user.getUpdatedAt()))
             .build();
@@ -117,6 +119,23 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
         log.info("Update user success with username : {}", username);
+
+        return toUserResponse(user);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse userProfilePicture(String username, UploadImageRequest request) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
+
+        log.info("Setting user's new profile picture...");
+
+        user.setProfilePicture(cloudinaryService.upload(request));
+
+        log.info("Saving to database...");
+
+        userRepository.save(user);
 
         return toUserResponse(user);
     }

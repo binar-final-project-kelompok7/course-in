@@ -1,9 +1,9 @@
 package com.github.k7.coursein.service;
 
-import com.github.k7.coursein.model.DeleteUserRequest;
-import com.github.k7.coursein.model.RegisterUserRequest;
-import com.github.k7.coursein.model.UpdateUserRequest;
-import com.github.k7.coursein.model.UserResponse;
+import com.github.k7.coursein.model.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 public interface UserService {
 
@@ -12,6 +12,8 @@ public interface UserService {
     UserResponse getUser(String username);
 
     UserResponse updateUser(String username, UpdateUserRequest request);
+
+    UserResponse userProfilePicture(String username, UploadImageRequest request);
 
     void deleteUser(String username, DeleteUserRequest request);
 

@@ -64,6 +64,9 @@ public class User implements UserDetails, CreatedAtAware, UpdatedAtAware {
     @Column(nullable = false, length = 250)
     private String password;
 
+    @Column(name = "profile_picture")
+    private String profilePicture;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

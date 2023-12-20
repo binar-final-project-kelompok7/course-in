@@ -1,11 +1,7 @@
 package com.github.k7.coursein.controller;
 
 import com.github.k7.coursein.enums.CourseType;
-import com.github.k7.coursein.model.DeleteUserRequest;
-import com.github.k7.coursein.model.RegisterUserRequest;
-import com.github.k7.coursein.model.UpdateUserRequest;
-import com.github.k7.coursein.model.UserResponse;
-import com.github.k7.coursein.model.WebResponse;
+import com.github.k7.coursein.model.*;
 import com.github.k7.coursein.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @AllArgsConstructor
@@ -60,6 +59,19 @@ public class UserController {
     public WebResponse<UserResponse> updateUser(@PathVariable("username") String username,
                                                 @RequestBody UpdateUserRequest request) {
         UserResponse userResponse = userService.updateUser(username, request);
+        return WebResponse.<UserResponse>builder()
+            .code(HttpStatus.OK.value())
+            .message(HttpStatus.OK.getReasonPhrase())
+            .data(userResponse)
+            .build();
+    }
+
+    @PatchMapping(
+        path = "/profile-picture/{username}"
+    )
+    public WebResponse<UserResponse> profilePicture(@PathVariable("username") String username,
+                                                    @ModelAttribute UploadImageRequest request) {
+        UserResponse userResponse = userService.userProfilePicture(username, request);
         return WebResponse.<UserResponse>builder()
             .code(HttpStatus.OK.value())
             .message(HttpStatus.OK.getReasonPhrase())

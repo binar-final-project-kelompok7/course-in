@@ -33,4 +33,6 @@ public class CloudinaryServiceImpl implements CloudinaryService {
             return e.getMessage();
         }
     }
+
+    //TODO: image compression, delete image from media, ...
 }

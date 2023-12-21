@@ -3,6 +3,7 @@ package com.github.k7.coursein.service;
 import com.github.k7.coursein.entity.Course;
 import com.github.k7.coursein.entity.Intended;
 import com.github.k7.coursein.enums.CourseCategory;
+import com.github.k7.coursein.enums.CourseFilter;
 import com.github.k7.coursein.enums.CourseLevel;
 import com.github.k7.coursein.enums.CourseType;
 import com.github.k7.coursein.model.AddCourseRequest;
@@ -15,13 +16,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -118,88 +122,126 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<CourseResponse> getAllCourse(int page, int size, String[] filters, List<CourseCategory> categories, List<CourseLevel> levels, CourseType type) {
+    public Page<CourseResponse> getAllCourse(CourseType type,
+                                             Set<CourseFilter> filters,
+                                             Set<CourseCategory> categories,
+                                             Set<CourseLevel> levels,
+                                             int page, int size) {
         log.info("Fetching all available courses. Page: {}, Size: {}", page, size);
 
         PageRequest pageRequest = PageRequest.of(page, size);
+        List<Course> courses = courseRepository.findAll();
 
-        List<Course> filteredCourse = new ArrayList<>();
-        List<Course> filteredByCategories = new ArrayList<>();
-        List<Course> filteredByLevels = new ArrayList<>();
-        List<Course> filteredByType = new ArrayList<>();
-
-        if (categories != null && !categories.isEmpty()) {
-            log.info("Checking categories: {}", categories);
-            categories.forEach(
-                courseCategory -> courseRepository
-                    .findAll()
-                    .stream()
-                    .filter(course -> course.getCategory().equals(courseCategory))
-                    .forEach(filteredByCategories::add)
-            );
-            filteredCourse = filteredByCategories;
+        List<Course> filteredCourses;
+        if (type == null && filters == null && categories == null && levels == null) {
+            filteredCourses = courses;
+        } else {
+            filteredCourses = new LinkedList<>();
         }
 
-        if (levels != null && !levels.isEmpty()) {
-            log.info("Checking levels: {}", levels);
-            if (categories == null || categories.isEmpty()) {
-                levels.forEach(
-                    courseLevel -> courseRepository
-                        .findAll()
-                        .stream()
-                        .filter(course -> course.getLevel().equals(courseLevel))
-                        .forEach(filteredByLevels::add)
-                );
-            } else {
-                levels.forEach(
-                    courseLevel -> filteredByCategories
-                        .stream()
-                        .filter(course -> course.getLevel().equals(courseLevel))
-                        .forEach(filteredByLevels::add)
-                );
-            }
-            filteredCourse = filteredByLevels;
-        }
-
-        if (type != null) {
-            log.info("Checking type: {}", type);
-            if ((categories == null || categories.isEmpty()) && (levels == null || levels.isEmpty())) {
-                courseRepository
-                    .findAll()
-                    .stream()
-                    .filter(course -> course.getType().equals(type))
-                    .forEach(filteredByType::add);
-            } else if (levels == null || levels.isEmpty()) {
-                filteredByCategories
-                    .stream()
-                    .filter(course -> course.getType().equals(type))
-                    .forEach(filteredByType::add);
-            } else {
-                filteredByLevels
-                    .stream()
-                    .filter(course -> course.getType().equals(type))
-                    .forEach(filteredByType::add);
-            }
-            filteredCourse = filteredByType;
-        }
-
-        if (categories == null && levels == null && type == null) {
-            filteredCourse.addAll(courseRepository
-                .findAll());
-        }
-
-        if (filters != null && filters.length != 0) {
-            log.info("Checking filters");
-            pageRequest = PageRequest.of(page, size, Sort.by(filters).descending());
-        }
+        filteredCourses = applyFilterByType(type, courses, filteredCourses);
+        filteredCourses = applyFilter(filters, courses, filteredCourses);
+        filteredCourses = applyFilterByCategories(categories, courses, filteredCourses);
+        filteredCourses = applyFilterByLevels(levels, courses, filteredCourses);
 
         int start = (int) pageRequest.getOffset();
-        int end = Math.min((start + pageRequest.getPageSize()), filteredCourse.size());
-        List<CourseResponse> pageContent = filteredCourse.stream()
-            .map(CourseServiceImpl::toCourseResponse)
-            .collect(Collectors.toList()).subList(start, end);
+        int end = Math.min((start + pageRequest.getPageSize()), filteredCourses.size());
 
-        return new PageImpl<>(pageContent, pageRequest, filteredCourse.size());
+        List<Course> pageContent = filteredCourses.subList(start, end);
+        List<CourseResponse> courseResponses = pageContent.stream()
+            .map(CourseServiceImpl::toCourseResponse)
+            .collect(Collectors.toList());
+
+        log.info("Returning {} courses on page {} of size {}", courseResponses.size(), page, size);
+
+        return new PageImpl<>(courseResponses, pageRequest, filteredCourses.size());
+    }
+
+    private static List<Course> applyFilterByLevels(Set<CourseLevel> levels,
+                                                    List<Course> courses,
+                                                    List<Course> filteredCourses) {
+        List<Course> filteredCoursesByLevels;
+        if (levels != null && !levels.isEmpty()) {
+            filteredCoursesByLevels = new LinkedList<>();
+            if (!filteredCourses.isEmpty()) {
+                levels
+                    .forEach(level -> filteredCourses.stream()
+                        .filter(course -> course.getLevel().equals(level))
+                        .forEach(filteredCoursesByLevels::add));
+            } else {
+                levels
+                    .forEach(level -> courses.stream()
+                        .filter(course -> course.getLevel().equals(level))
+                        .forEach(filteredCoursesByLevels::add));
+            }
+        } else {
+            filteredCoursesByLevels = filteredCourses;
+        }
+
+        return filteredCoursesByLevels;
+    }
+
+    private static List<Course> applyFilterByCategories(Set<CourseCategory> categories,
+                                                        List<Course> courses,
+                                                        List<Course> filteredCourses) {
+        List<Course> filteredCoursesByCategories;
+        if (categories != null && !categories.isEmpty()) {
+            filteredCoursesByCategories = new LinkedList<>();
+            if (!filteredCourses.isEmpty()) {
+                categories
+                    .forEach(category -> filteredCourses.stream()
+                        .filter(course -> course.getCategory().equals(category))
+                        .forEach(filteredCoursesByCategories::add));
+            } else {
+                categories
+                    .forEach(category -> courses.stream()
+                        .filter(course -> course.getCategory().equals(category))
+                        .forEach(filteredCoursesByCategories::add));
+            }
+        } else {
+            filteredCoursesByCategories = filteredCourses;
+        }
+
+        return filteredCoursesByCategories;
+    }
+
+    private static List<Course> applyFilter(Set<CourseFilter> filters,
+                                            List<Course> courses,
+                                            List<Course> filteredCourses) {
+        if (filters != null && !filters.isEmpty() && (filteredCourses.isEmpty())) {
+            if (filters.contains(CourseFilter.NEWEST)) {
+                courses.stream()
+                    .filter(course -> TimeUtil.isBefore7Days(course.getCreatedAt()))
+                    .forEach(filteredCourses::add);
+            }
+
+            if (filters.contains(CourseFilter.POPULAR)) {
+                courses.stream()
+                    .filter(Objects::nonNull)
+                    .forEach(filteredCourses::add);
+            }
+
+            if (filters.contains(CourseFilter.DISCOUNT)) {
+                courses.stream()
+                    .filter(Objects::nonNull)
+                    .forEach(filteredCourses::add);
+            }
+        }
+
+        return filteredCourses;
+    }
+
+    private static List<Course> applyFilterByType(CourseType type,
+                                                  List<Course> courses,
+                                                  List<Course> filteredCourses) {
+        List<Course> filteredCoursesByType = filteredCourses;
+        if (type != null) {
+            filteredCoursesByType = courses.stream()
+                .filter(course -> course.getType().equals(type))
+                .collect(Collectors.toList());
+        }
+
+        return filteredCoursesByType;
     }
 
     @Override
@@ -310,11 +352,18 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public Long numberOfCourse(CourseType courseType) {
-        if (courseType == null) {
-            return courseRepository.count();
-        }
-        return courseRepository.countByType(courseType);
+    @Transactional(readOnly = true)
+    public long countCourse() {
+        return courseRepository.count();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countPremiumCourse() {
+        List<Course> courses = courseRepository.findAll();
+        return courses.stream()
+            .filter(course -> course.getType().equals(CourseType.PREMIUM))
+            .count();
     }
 
 }

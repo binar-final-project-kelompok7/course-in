@@ -19,4 +19,9 @@ public class TimeUtil {
         return localDateTime.format(FORMATTER);
     }
 
+    public boolean isBefore7Days(LocalDateTime localDateTime) {
+        LocalDateTime now = getFormattedLocalDateTimeNow();
+        return localDateTime.isBefore(now.plusDays(7));
+    }
+
 }

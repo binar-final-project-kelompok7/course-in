@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -112,8 +111,12 @@ public class UserServiceImpl implements UserService {
             user.setName(request.getName());
         }
 
-        if (Objects.nonNull(request.getPassword())) {
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        if (Objects.nonNull(request.getEmail())) {
+            if (userRepository.existsByUsernameOrEmail(null, request.getEmail())) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists!");
+            }
+
+            user.setEmail(request.getEmail());
         }
 
         userRepository.save(user);
@@ -142,6 +145,27 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public void updatePassword(String username, UpdatePasswordUserRequest request) {
+        validationService.validate(request);
+
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid password");
+        }
+
+        if (!Objects.equals(request.getNewPassword(), request.getConfirmNewPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password cannot be same as old password");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
     public void deleteUser(String username, DeleteUserRequest request) {
         validationService.validate(request);
 
@@ -155,6 +179,12 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(user);
 
         log.info("Delete user success with username : {}", username);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countUser() {
+        return userRepository.count();
     }
 
     @Override

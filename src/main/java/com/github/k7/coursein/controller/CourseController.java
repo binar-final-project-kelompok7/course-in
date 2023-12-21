@@ -1,6 +1,7 @@
 package com.github.k7.coursein.controller;
 
 import com.github.k7.coursein.enums.CourseCategory;
+import com.github.k7.coursein.enums.CourseFilter;
 import com.github.k7.coursein.enums.CourseLevel;
 import com.github.k7.coursein.enums.CourseType;
 import com.github.k7.coursein.model.AddCourseRequest;
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @RestController
 @AllArgsConstructor
@@ -65,20 +66,14 @@ public class CourseController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<List<CourseResponse>> getAllCourse(
+        @RequestParam(name = "type", required = false) CourseType type,
+        @RequestParam(name = "filters", required = false) Set<CourseFilter> filters,
+        @RequestParam(name = "categories", required = false) Set<CourseCategory> categories,
+        @RequestParam(name = "levels", required = false) Set<CourseLevel> levels,
         @RequestParam(name = "page", defaultValue = "0") int page,
-        @RequestParam(name = "size", defaultValue = "10") int size,
-        @RequestParam(name = "filter", required = false) List<String> filters,
-        @RequestParam(name = "category", required = false) List<CourseCategory> category,
-        @RequestParam(name = "level", required = false) List<CourseLevel> levels,
-        @RequestParam(name = "type", required = false) CourseType type
+        @RequestParam(name = "size", defaultValue = "10") int size
     ) {
-        Page<CourseResponse> allCourse = courseService.getAllCourse(
-            page,
-            size,
-            filters.toArray(new String[0]),
-            category,
-            levels,
-            type);
+        Page<CourseResponse> allCourse = courseService.getAllCourse(type, filters, categories, levels, page, size);
         return WebResponse.<List<CourseResponse>>builder()
             .code(HttpStatus.OK.value())
             .message(HttpStatus.OK.getReasonPhrase())
@@ -119,24 +114,28 @@ public class CourseController {
     }
 
     @GetMapping(
-        path = "/count-course",
+        path = "/count",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public WebResponse<Long> numberOfCourse(
-        @RequestParam(name = "type", required = false) String type
-    ) {
-        if (type == null) {
-            return WebResponse.<Long>builder()
-                .data(courseService.numberOfCourse(null))
-                .code(HttpStatus.OK.value())
-                .message(HttpStatus.OK.getReasonPhrase())
-                .build();
-        }
-
+    public WebResponse<Long> countCourse() {
+        long count = courseService.countCourse();
         return WebResponse.<Long>builder()
-            .data(courseService.numberOfCourse(CourseType.valueOf(type)))
             .code(HttpStatus.OK.value())
             .message(HttpStatus.OK.getReasonPhrase())
+            .data(count)
+            .build();
+    }
+
+    @GetMapping(
+        path = "/count/premium",
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public WebResponse<Long> countPremiumCourse() {
+        long count = courseService.countPremiumCourse();
+        return WebResponse.<Long>builder()
+            .code(HttpStatus.OK.value())
+            .message(HttpStatus.OK.getReasonPhrase())
+            .data(count)
             .build();
     }
 

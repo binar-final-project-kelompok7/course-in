@@ -1,6 +1,7 @@
 package com.github.k7.coursein.service;
 
 import com.github.k7.coursein.model.*;
+import com.github.k7.coursein.model.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -15,7 +16,11 @@ public interface UserService {
 
     UserResponse userProfilePicture(String username, UploadImageRequest request);
 
+    void updatePassword(String username, UpdatePasswordUserRequest request);
+
     void deleteUser(String username, DeleteUserRequest request);
+
+    long countUser();
 
     Long numberOfUser();
 

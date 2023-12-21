@@ -63,26 +63,21 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void sendForgotPasswordEmail(String toEmail, String resetLink) {
+    public void sendForgotPasswordEmail(String toEmail, String resetLink) throws MessagingException {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
 
-        try {
-            helper.setTo(toEmail);
-            String emailSubject = "CourseIn - Forgot Password";
-            helper.setSubject(emailSubject);
+        helper.setTo(toEmail);
+        String emailSubject = "CourseIn - Forgot Password";
+        helper.setSubject(emailSubject);
 
-            String emailText = "Klik link di bawah ini untuk melakukan konfirmasi reset password anda\n"
-                + "jika anda tidak merasa mengirim permintaan, silahkan abaikan email ini.\n\n"
-                + resetLink
-                + "\n\nCourseIn team";
-            helper.setText(emailText, true);
+        String emailText = "Klik link di bawah ini untuk melakukan konfirmasi reset password anda\n"
+            + "jika anda tidak merasa mengirim permintaan, silahkan abaikan email ini.\n\n"
+            + resetLink
+            + "\n\nCourseIn team";
+        helper.setText(emailText, true);
 
-            javaMailSender.send(mimeMessage);
-
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
+        javaMailSender.send(mimeMessage);
     }
 
     @Override
@@ -101,7 +96,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public ResetPassword requestForgotPassword(SendEmailRequest request) {
+    public ResetPassword requestForgotPassword(SendEmailRequest request) throws MessagingException {
         validationService.validate(request);
 
         String email = request.getEmail();

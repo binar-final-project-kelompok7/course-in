@@ -5,15 +5,17 @@ import com.github.k7.coursein.model.LoginRequest;
 import com.github.k7.coursein.model.ForgotPasswordRequest;
 import com.github.k7.coursein.model.SendEmailRequest;
 
+import javax.mail.MessagingException;
+
 public interface AuthService {
 
     String login(LoginRequest request);
 
-    void sendForgotPasswordEmail(String toEmail, String resetLink);
+    void sendForgotPasswordEmail(String toEmail, String resetLink) throws MessagingException;
 
     ResetPassword generateResetToken(String email);
 
-    ResetPassword requestForgotPassword(SendEmailRequest request);
+    ResetPassword requestForgotPassword(SendEmailRequest request) throws MessagingException;
 
     ResetPassword confirmForgotPassword(ForgotPasswordRequest forgotPasswordRequest);
 

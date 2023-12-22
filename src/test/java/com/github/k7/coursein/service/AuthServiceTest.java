@@ -4,6 +4,7 @@ import com.github.k7.coursein.entity.Role;
 import com.github.k7.coursein.entity.User;
 import com.github.k7.coursein.enums.UserRole;
 import com.github.k7.coursein.model.LoginRequest;
+import com.github.k7.coursein.model.UserResponse;
 import com.github.k7.coursein.repository.UserRepository;
 import com.github.k7.coursein.util.TimeUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -88,7 +89,8 @@ class AuthServiceTest {
     void testLogin_Success() {
         when(authenticationManager.authenticate(any()))
             .thenReturn(authentication);
-        String token = authService.login(request);
+        UserResponse userResponse = authService.login(request);
+        String token = authService.createToken(request.getUsername());
 
         assertNotNull(token);
 

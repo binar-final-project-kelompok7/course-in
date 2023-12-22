@@ -2,6 +2,7 @@ package com.github.k7.coursein.service;
 
 import com.github.k7.coursein.entity.User;
 import com.github.k7.coursein.model.LoginRequest;
+import com.github.k7.coursein.model.UserResponse;
 import com.github.k7.coursein.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional(readOnly = true)
-    public String login(LoginRequest request) {
+    public UserResponse login(LoginRequest request) {
         validationService.validate(request);
 
         authenticationManager.authenticate(
@@ -37,6 +38,13 @@ public class AuthServiceImpl implements AuthService {
         log.info("Authentication Successful for user : {}", request.getUsername());
 
         User user = userRepository.findByUsernameOrEmail(request.getUsername(), request.getUsername())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found!"));
+
+        return UserServiceImpl.toUserResponse(user);
+    }
+
+    public String createToken(String username) {
+        User user = userRepository.findByUsernameOrEmail(username, username)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found!"));
 
         return jwtService.generateToken(user);

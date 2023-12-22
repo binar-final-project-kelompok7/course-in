@@ -3,7 +3,12 @@ package com.github.k7.coursein.service;
 import com.github.k7.coursein.entity.Role;
 import com.github.k7.coursein.entity.User;
 import com.github.k7.coursein.enums.UserRole;
-import com.github.k7.coursein.model.*;
+import com.github.k7.coursein.model.DeleteUserRequest;
+import com.github.k7.coursein.model.RegisterUserRequest;
+import com.github.k7.coursein.model.UpdatePasswordUserRequest;
+import com.github.k7.coursein.model.UpdateUserRequest;
+import com.github.k7.coursein.model.UploadImageRequest;
+import com.github.k7.coursein.model.UserResponse;
 import com.github.k7.coursein.repository.RoleRepository;
 import com.github.k7.coursein.repository.UserRepository;
 import com.github.k7.coursein.util.TimeUtil;
@@ -15,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -128,13 +134,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponse userProfilePicture(String username, UploadImageRequest request) {
+    public UserResponse updateProfilePicture(String username, UploadImageRequest request) throws IOException {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
 
-        log.info("Setting user's new profile picture...");
+        if (Objects.nonNull(user.getProfilePicture())) {
+            log.info("Found previous profile picture link");
+            log.info("Deleting previous profile picture link...");
+            cloudinaryService.delete(username);
+            log.info("Deleted previous profile picture link");
+        }
 
-        user.setProfilePicture(cloudinaryService.upload(request));
+        log.info("Setting user {} new profile picture...", username);
+
+        user.setProfilePicture(cloudinaryService.upload(username, request));
 
         log.info("Saving to database...");
 
@@ -184,11 +197,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public long countUser() {
-        return userRepository.count();
-    }
-
-    @Override
-    public Long numberOfUser() {
         return userRepository.count();
     }
 

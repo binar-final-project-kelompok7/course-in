@@ -18,21 +18,24 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     private final Cloudinary cloudinary;
 
     @Override
-    public String upload(UploadImageRequest request) {
-        try {
-            log.info("Uploading");
+    public String upload(String username, UploadImageRequest request) throws IOException {
+        log.info("Uploading");
 
-            Map<?, ?> uploadedImage = cloudinary
-                .uploader()
-                .upload(request.getMultipartFile().getBytes(),
-                    ObjectUtils.asMap("public_id", request.getUploader()));
+        Map<?, ?> uploadedImage = cloudinary
+            .uploader()
+            .upload(request.getMultipartFile().getBytes(),
+                ObjectUtils.asMap("public_id", username));
 
-            log.info("finished");
-            return uploadedImage.get("url").toString();
-        } catch (IOException e) {
-            return e.getMessage();
-        }
+        log.info("finished");
+        return uploadedImage.get("url").toString();
     }
 
-    //TODO: image compression, delete image from media, ...
+    @Override
+    public void delete(String username) throws IOException {
+        log.info("Deleting profile picture of user {}", username);
+
+        cloudinary.uploader().destroy(username, ObjectUtils.asMap("resource_type", "image"));
+    }
+
+    //TODO: image compression, ...
 }

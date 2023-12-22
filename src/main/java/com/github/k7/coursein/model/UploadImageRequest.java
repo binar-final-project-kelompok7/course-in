@@ -14,5 +14,4 @@ public class UploadImageRequest {
 
     private MultipartFile multipartFile;
 
-    private String uploader;
 }

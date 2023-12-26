@@ -5,22 +5,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserResponse {
+public class RegisterOTPResponse {
 
-    private String username;
+    Integer otpCode;
 
-    private String email;
+    String email;
 
-    private String name;
-
-    private boolean enabled;
-
-    private String createdAt;
-
-    private String updatedAt;
-
+    LocalDateTime expiredDate;
 }

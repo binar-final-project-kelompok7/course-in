@@ -10,6 +10,10 @@ import com.github.k7.coursein.model.UpdateUserRequest;
 import com.github.k7.coursein.model.UserResponse;
 import com.github.k7.coursein.model.VerifyOtpRequest;
 import com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
+import com.github.k7.coursein.model.UploadImageRequest;
+
+import java.io.IOException;
+
 
 public interface UserService {
 
@@ -18,6 +22,8 @@ public interface UserService {
     UserResponse getUser(String username);
 
     UserResponse updateUser(String username, UpdateUserRequest request);
+
+    UserResponse updateProfilePicture(String username, UploadImageRequest request) throws IOException;
 
     void updatePassword(String username, UpdatePasswordUserRequest request);
 

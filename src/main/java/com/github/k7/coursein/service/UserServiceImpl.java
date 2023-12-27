@@ -13,6 +13,7 @@ import com.github.k7.coursein.model.UpdateUserRequest;
 import com.github.k7.coursein.model.UserResponse;
 import com.github.k7.coursein.model.VerifyOtpRequest;
 import com.github.k7.coursein.repository.RegisterOtpRepository;
+import com.github.k7.coursein.model.UploadImageRequest;
 import com.github.k7.coursein.repository.RoleRepository;
 import com.github.k7.coursein.repository.UserRepository;
 import com.github.k7.coursein.util.TimeUtil;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -49,6 +51,10 @@ public class UserServiceImpl implements UserService {
     private final ValidationService validationService;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final CloudinaryService cloudinaryService;
+
+    private static final String USER_NOT_FOUND = "User not found!";
 
     private final JavaMailSender javaMailSender;
 
@@ -114,6 +120,7 @@ public class UserServiceImpl implements UserService {
             .username(user.getUsername())
             .name(user.getName())
             .email(user.getEmail())
+            .pictLink(user.getProfilePicture())
             .enabled(user.isEnabled())
             .createdAt(TimeUtil.formatToString(user.getCreatedAt()))
             .updatedAt(TimeUtil.formatToString(user.getUpdatedAt()))
@@ -147,6 +154,30 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
         log.info("Update user success with username : {}", username);
+
+        return toUserResponse(user);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse updateProfilePicture(String username, UploadImageRequest request) throws IOException {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
+
+        if (Objects.nonNull(user.getProfilePicture())) {
+            log.info("Found previous profile picture link");
+            log.info("Deleting previous profile picture link...");
+            cloudinaryService.delete(username);
+            log.info("Deleted previous profile picture link");
+        }
+
+        log.info("Setting user {} new profile picture...", username);
+
+        user.setProfilePicture(cloudinaryService.upload(username, request));
+
+        log.info("Saving to database...");
+
+        userRepository.save(user);
 
         return toUserResponse(user);
     }

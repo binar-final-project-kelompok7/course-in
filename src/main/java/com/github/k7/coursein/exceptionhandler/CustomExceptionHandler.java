@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.ConstraintViolationException;
+import java.io.IOException;
 
 @ControllerAdvice
 public class CustomExceptionHandler {
@@ -79,6 +80,16 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<WebResponse<String>> exception(BadCredentialsException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(WebResponse.<String>builder()
+                .code(HttpStatus.BAD_REQUEST.value())
+                .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .errors(exception.getMessage())
+                .build());
+    }
+
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<WebResponse<String>> exception(IOException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(WebResponse.<String>builder()
                 .code(HttpStatus.BAD_REQUEST.value())

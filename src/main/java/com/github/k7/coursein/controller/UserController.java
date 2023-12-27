@@ -93,7 +93,7 @@ public class UserController {
             .build();
     }
 
-    @PatchMapping(
+    @PostMapping(
         path = "/upload/profile-picture/{username}",
         produces = MediaType.APPLICATION_JSON_VALUE
     )

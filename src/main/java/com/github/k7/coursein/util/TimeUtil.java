@@ -16,7 +16,7 @@ public class TimeUtil {
     }
 
     public String formatToString(LocalDateTime localDateTime) {
-        return localDateTime.format(FORMATTER);
+        return localDateTime != null ? localDateTime.format(FORMATTER) : null;
     }
 
     public boolean isBefore7Days(LocalDateTime localDateTime) {

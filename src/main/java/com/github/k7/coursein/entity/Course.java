@@ -28,8 +28,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -94,6 +92,6 @@ public class Course implements CreatedAtAware, UpdatedAtAware {
     private Set<Intended> intendeds = new HashSet<>();
 
     @OneToMany(mappedBy = "course")
-    private List<OrderDetail> orderDetails = new LinkedList<>();
+    private Set<Order> orders = new HashSet<>();
 
 }

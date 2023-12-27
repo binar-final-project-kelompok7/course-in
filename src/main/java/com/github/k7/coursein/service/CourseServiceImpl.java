@@ -2,6 +2,7 @@ package com.github.k7.coursein.service;
 
 import com.github.k7.coursein.entity.Course;
 import com.github.k7.coursein.entity.Intended;
+import com.github.k7.coursein.entity.User;
 import com.github.k7.coursein.enums.CourseCategory;
 import com.github.k7.coursein.enums.CourseFilter;
 import com.github.k7.coursein.enums.CourseLevel;
@@ -10,6 +11,7 @@ import com.github.k7.coursein.model.AddCourseRequest;
 import com.github.k7.coursein.model.CourseResponse;
 import com.github.k7.coursein.model.UpdateCourseRequest;
 import com.github.k7.coursein.repository.CourseRepository;
+import com.github.k7.coursein.repository.UserRepository;
 import com.github.k7.coursein.util.TimeUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,8 @@ public class CourseServiceImpl implements CourseService {
     private final CourseRepository courseRepository;
 
     private final ValidationService validationService;
+
+    private final UserRepository userRepository;
 
     private static final String COURSE_NOT_FOUND_MESSAGE = "Course not found";
 
@@ -131,8 +135,39 @@ public class CourseServiceImpl implements CourseService {
 
         PageRequest pageRequest = PageRequest.of(page, size);
         List<Course> courses = courseRepository.findAll();
+        return filteringAndPagingCourse(type, filters, categories, levels, pageRequest, courses);
+    }
 
+    @Override
+    public Page<CourseResponse> getAllCourseUser(String username, CourseType type, Set<CourseFilter> filters, Set<CourseCategory> categories, Set<CourseLevel> levels, int page, int size) {
+        log.info("Fetching all user courses. Page: {}, Size: {}", page, size);
+
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        PageRequest pageRequest = PageRequest.of(page, size);
+        List<Course> courses = courseRepository.findAllByUsers(user);
+        return filteringAndPagingCourse(type, filters, categories, levels, pageRequest, courses);
+    }
+
+    private Page<CourseResponse> filteringAndPagingCourse(CourseType type, Set<CourseFilter> filters, Set<CourseCategory> categories, Set<CourseLevel> levels, PageRequest pageRequest, List<Course> courses) {
+        List<Course> filteredCourses = filterCourses(type, filters, categories, levels, courses);
+        List<CourseResponse> courseResponses = paginateAndConvertToResponse(pageRequest, filteredCourses);
+
+        log.info("Returning {} courses on page {} of size {}",
+            courseResponses.size(),
+            pageRequest.getPageNumber(),
+            pageRequest.getPageSize()
+        );
+
+        return new PageImpl<>(courseResponses, pageRequest, filteredCourses.size());
+    }
+
+    private List<Course> filterCourses(CourseType type, Set<CourseFilter> filters,
+                                       Set<CourseCategory> categories, Set<CourseLevel> levels,
+                                       List<Course> courses) {
         List<Course> filteredCourses;
+
         if (type == null && filters == null && categories == null && levels == null) {
             filteredCourses = courses;
         } else {
@@ -144,17 +179,17 @@ public class CourseServiceImpl implements CourseService {
         filteredCourses = applyFilterByCategories(categories, courses, filteredCourses);
         filteredCourses = applyFilterByLevels(levels, courses, filteredCourses);
 
+        return filteredCourses;
+    }
+
+    private List<CourseResponse> paginateAndConvertToResponse(PageRequest pageRequest, List<Course> filteredCourses) {
         int start = (int) pageRequest.getOffset();
         int end = Math.min((start + pageRequest.getPageSize()), filteredCourses.size());
 
         List<Course> pageContent = filteredCourses.subList(start, end);
-        List<CourseResponse> courseResponses = pageContent.stream()
+        return pageContent.stream()
             .map(CourseServiceImpl::toCourseResponse)
             .collect(Collectors.toList());
-
-        log.info("Returning {} courses on page {} of size {}", courseResponses.size(), page, size);
-
-        return new PageImpl<>(courseResponses, pageRequest, filteredCourses.size());
     }
 
     private static List<Course> applyFilterByLevels(Set<CourseLevel> levels,

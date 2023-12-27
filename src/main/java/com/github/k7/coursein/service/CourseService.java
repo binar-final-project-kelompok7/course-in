@@ -23,6 +23,13 @@ public interface CourseService {
                                       Set<CourseLevel> levels,
                                       int page, int size);
 
+    Page<CourseResponse> getAllCourseUser(String username,
+                                          CourseType type,
+                                          Set<CourseFilter> filters,
+                                          Set<CourseCategory> categories,
+                                          Set<CourseLevel> levels,
+                                          int page, int size);
+
     CourseResponse updateCourse(String code, UpdateCourseRequest request);
 
     void deleteCourse(String code);

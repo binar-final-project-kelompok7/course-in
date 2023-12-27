@@ -4,8 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.k7.coursein.entity.User;
 import com.github.k7.coursein.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,11 +21,17 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.List;
+
 @Configuration
 @AllArgsConstructor
+@Slf4j
 public class SecurityBeanConfiguration {
 
     private final UserRepository userRepository;
+
+    @Value("${cors.allowed-origins}")
+    private List<String> allowedOrigins;
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -61,11 +71,14 @@ public class SecurityBeanConfiguration {
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
-            public void addCorsMappings(CorsRegistry registry) {
+            public void addCorsMappings(@NonNull CorsRegistry registry) {
+                log.info("CORS allowed origins : {}", allowedOrigins);
                 registry.addMapping("/**")
-                    .allowedOrigins("*")
-                    .allowedMethods("GET", "POST", "PUT", "DELETE")
-                    .allowedHeaders("*");
+                    .allowedOrigins(allowedOrigins.toArray(new String[10]))
+                    .allowedMethods("GET", "POST", "PATCH", "PUT", "DELETE")
+                    .allowedHeaders("*")
+                    .exposedHeaders(HttpHeaders.AUTHORIZATION)
+                    .allowCredentials(true);
             }
         };
     }

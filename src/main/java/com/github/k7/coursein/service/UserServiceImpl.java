@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
         return toUserResponse(user);
     }
 
-    private static UserResponse toUserResponse(User user) {
+    public static UserResponse toUserResponse(User user) {
         return UserResponse.builder()
             .username(user.getUsername())
             .name(user.getName())

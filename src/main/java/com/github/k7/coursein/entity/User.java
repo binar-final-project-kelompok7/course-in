@@ -73,6 +73,9 @@ public class User implements UserDetails, CreatedAtAware, UpdatedAtAware {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "enabled")
+    private boolean enabled;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(
         name = "user_roles",

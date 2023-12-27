@@ -12,21 +12,10 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RegisterUserRequest {
-
-    @NotBlank
-    @Size(max = 50)
-    private String username;
+public class ResendOTPRequest {
 
     @Size(max = 100)
-    private String name;
-
     @NotBlank
-    @Size(max = 100)
     private String email;
-
-    @NotBlank
-    @Size(min = 8, max = 100)
-    private String password;
 
 }

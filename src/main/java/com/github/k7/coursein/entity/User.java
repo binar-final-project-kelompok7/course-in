@@ -64,11 +64,17 @@ public class User implements UserDetails, CreatedAtAware, UpdatedAtAware {
     @Column(nullable = false, length = 250)
     private String password;
 
+    @Column(name = "profile_picture")
+    private String profilePicture;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "enabled")
+    private boolean enabled;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(

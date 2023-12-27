@@ -12,14 +12,10 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RegisterUserRequest {
+public class ForgotPasswordRequest {
 
     @NotBlank
-    @Size(max = 50)
-    private String username;
-
-    @Size(max = 100)
-    private String name;
+    private String token;
 
     @NotBlank
     @Size(max = 100)
@@ -27,6 +23,14 @@ public class RegisterUserRequest {
 
     @NotBlank
     @Size(min = 8, max = 100)
-    private String password;
+    private String oldPassword;
+
+    @NotBlank
+    @Size(min = 8, max = 100)
+    private String newPassword;
+
+    @NotBlank
+    @Size(min = 8, max = 100)
+    private String confirmNewPassword;
 
 }

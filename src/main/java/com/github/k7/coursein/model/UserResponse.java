@@ -17,6 +17,10 @@ public class UserResponse {
 
     private String name;
 
+    private boolean enabled;
+
+    private String pictLink;
+
     private String createdAt;
 
     private String updatedAt;

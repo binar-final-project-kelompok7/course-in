@@ -6,13 +6,16 @@ import com.github.k7.coursein.enums.CourseLevel;
 import com.github.k7.coursein.enums.CourseType;
 import com.github.k7.coursein.model.CourseResponse;
 import com.github.k7.coursein.model.DeleteUserRequest;
+import com.github.k7.coursein.model.RegisterOTPResponse;
 import com.github.k7.coursein.model.OrderResponse;
 import com.github.k7.coursein.model.PagingResponse;
 import com.github.k7.coursein.model.PayOrderRequest;
 import com.github.k7.coursein.model.RegisterUserRequest;
+import com.github.k7.coursein.model.ResendOTPRequest;
 import com.github.k7.coursein.model.UpdatePasswordUserRequest;
 import com.github.k7.coursein.model.UpdateUserRequest;
 import com.github.k7.coursein.model.UserResponse;
+import com.github.k7.coursein.model.VerifyOtpRequest;
 import com.github.k7.coursein.model.WebResponse;
 import com.github.k7.coursein.service.CourseService;
 import com.github.k7.coursein.service.OrderService;
@@ -55,8 +58,22 @@ public class UserController {
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<WebResponse<String>> registerUser(@RequestBody RegisterUserRequest request) {
-        String token = userService.registerUser(request);
+    public WebResponse<RegisterOTPResponse> registerUser(@RequestBody RegisterUserRequest request) {
+        RegisterOTPResponse response = userService.registerUser(request);
+        return WebResponse.<RegisterOTPResponse>builder()
+            .code(HttpStatus.CREATED.value())
+            .message(HttpStatus.CREATED.getReasonPhrase())
+            .data(response)
+            .build();
+    }
+
+    @PostMapping(
+        path = "/verify-otp",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<WebResponse<String>> verifyOtp(@RequestBody VerifyOtpRequest request) {
+        String token = userService.verifyOTP(request);
         return ResponseEntity.status(HttpStatus.CREATED)
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
             .body(WebResponse.<String>builder()
@@ -65,12 +82,25 @@ public class UserController {
                 .build());
     }
 
+    @PostMapping(
+        path = "/resend-otp",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public WebResponse<RegisterOTPResponse> resendOtp(@RequestBody ResendOTPRequest request) {
+        RegisterOTPResponse response = userService.resendOtp(request);
+        return WebResponse.<RegisterOTPResponse>builder()
+            .code(HttpStatus.OK.value())
+            .message(HttpStatus.OK.getReasonPhrase())
+            .data(response)
+            .build();
+    }
+
     @GetMapping(
         path = "/{username}",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<UserResponse> getUser(@PathVariable("username") String username) {
-        log.info("Request get from {}", username);
         UserResponse response = userService.getUser(username);
         return WebResponse.<UserResponse>builder()
             .code(HttpStatus.OK.value())

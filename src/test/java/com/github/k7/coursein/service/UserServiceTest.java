@@ -11,7 +11,6 @@ import com.github.k7.coursein.model.UserResponse;
 import com.github.k7.coursein.repository.RoleRepository;
 import com.github.k7.coursein.repository.UserRepository;
 import com.github.k7.coursein.util.TimeUtil;
-import com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -55,7 +54,7 @@ class UserServiceTest {
     private UserServiceImpl userService;
 
     @Test
-    void testRegister_Success() throws MessagingException {
+    void testRegister_Success() throws RuntimeException {
         RegisterUserRequest request = RegisterUserRequest.builder()
             .username("TestUser")
             .email("testuser@example.com")

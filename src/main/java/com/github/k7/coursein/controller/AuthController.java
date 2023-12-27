@@ -1,6 +1,9 @@
 package com.github.k7.coursein.controller;
 
+import com.github.k7.coursein.entity.ResetPassword;
 import com.github.k7.coursein.model.LoginRequest;
+import com.github.k7.coursein.model.ForgotPasswordRequest;
+import com.github.k7.coursein.model.SendEmailRequest;
 import com.github.k7.coursein.model.UserResponse;
 import com.github.k7.coursein.model.WebResponse;
 import com.github.k7.coursein.service.AuthService;
@@ -10,9 +13,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.mail.MessagingException;
 
 @RestController
 @AllArgsConstructor
@@ -36,6 +42,38 @@ public class AuthController {
                 .code(HttpStatus.OK.value())
                 .message(HttpStatus.OK.getReasonPhrase())
                 .data(userResponse)
+                .build());
+    }
+
+    @PutMapping(
+        path = "/forgot-password",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<WebResponse<ResetPassword>> requestForgotPassword(@RequestBody SendEmailRequest request) throws MessagingException {
+        ResetPassword resetPassword = authService.requestForgotPassword(request);
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(WebResponse.<ResetPassword>builder()
+                .code(HttpStatus.OK.value())
+                .message(HttpStatus.OK.getReasonPhrase())
+                .data(resetPassword)
+                .build());
+    }
+
+    @PutMapping(
+        path = "/confirm-forgot-password",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<WebResponse<ResetPassword>> confirmForgotPassword(@RequestBody ForgotPasswordRequest request) {
+        ResetPassword resetPassword = authService.confirmForgotPassword(request);
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(WebResponse.<ResetPassword>builder()
+                .code(HttpStatus.OK.value())
+                .message(HttpStatus.OK.getReasonPhrase())
+                .data(resetPassword)
                 .build());
     }
 

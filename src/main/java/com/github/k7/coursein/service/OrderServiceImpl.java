@@ -20,6 +20,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -39,6 +41,8 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
 
     private final ValidationService validationService;
+
+    private final JavaMailSender javaMailSender;
 
     private static final String ORDER_NOT_FOUND = "Order not found!";
 
@@ -152,7 +156,26 @@ public class OrderServiceImpl implements OrderService {
         user.getCourses().add(course);
         userRepository.save(user);
 
+        sendPaymentMessageToEmail(user.getEmail());
+
         return toOrderResponse(order);
+    }
+
+    @Override
+    public void sendPaymentMessageToEmail(String toEmail) throws RuntimeException {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("CourseIn - Success Payment");
+
+        String emailText = "Terima kasih telah menyelesaikan pembayaran"
+            + "\nBuruan cek dan mulai belajar di website CourseIn !"
+            + "\n\nCourseIn Team";
+
+        message.setText(emailText);
+
+        javaMailSender.send(message);
+
+        log.info("Success to send message success payment email to: {}", toEmail);
     }
 
     private static OrderResponse toOrderResponse(Order order) {

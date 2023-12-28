@@ -18,4 +18,6 @@ public interface OrderService {
 
     OrderResponse payOrder(String username, String orderId, PayOrderRequest request);
 
+    void sendPaymentMessageToEmail(String toEmail) throws RuntimeException;
+
 }

@@ -9,7 +9,6 @@ import com.github.k7.coursein.model.UpdatePasswordUserRequest;
 import com.github.k7.coursein.model.UpdateUserRequest;
 import com.github.k7.coursein.model.UserResponse;
 import com.github.k7.coursein.model.VerifyOtpRequest;
-import com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
 import com.github.k7.coursein.model.UploadImageRequest;
 
 import java.io.IOException;
@@ -35,7 +34,7 @@ public interface UserService {
 
     RegisterOTPResponse resendOtp(ResendOTPRequest request);
 
-    void sendOtpToEmail(String toEmail, Integer OtpCode) throws MessagingException;
+    void sendOtpToEmail(String toEmail, Integer OtpCode) throws RuntimeException;
 
     RegisterOTP generateOtp(String email);
 

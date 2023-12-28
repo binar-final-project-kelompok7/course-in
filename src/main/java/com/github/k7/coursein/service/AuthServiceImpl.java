@@ -59,6 +59,10 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUsernameOrEmail(request.getUsername(), request.getUsername())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found!"));
 
+        if (!user.isEnabled()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please verify your email first!");
+        }
+
         return UserServiceImpl.toUserResponse(user);
     }
 

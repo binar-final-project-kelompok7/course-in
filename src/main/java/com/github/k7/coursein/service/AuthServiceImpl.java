@@ -132,7 +132,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public ResetPassword confirmForgotPassword(ForgotPasswordRequest request) {
+    public void confirmForgotPassword(ForgotPasswordRequest request) {
         validationService.validate(request);
 
         ResetPassword resetPassword = resetPasswordRepository.findById(request.getToken())
@@ -145,23 +145,13 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(request.getEmail())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User email not found"));
 
-        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid password");
-        }
-
         if (!Objects.equals(request.getNewPassword(), request.getConfirmNewPassword())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password cannot be same as old password");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password and confirm password do not match");
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
         resetPasswordRepository.deleteById(resetPassword.getToken());
-
-        return ResetPassword.builder()
-            .token(request.getToken())
-            .email(request.getEmail())
-            .expiredDate(resetPassword.getExpiredDate())
-            .build();
     }
 
 }

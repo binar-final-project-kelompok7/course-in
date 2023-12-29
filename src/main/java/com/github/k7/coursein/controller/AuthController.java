@@ -50,15 +50,14 @@ public class AuthController {
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<WebResponse<ResetPassword>> requestForgotPassword(@RequestBody SendEmailRequest request) throws MessagingException {
+    public WebResponse<ResetPassword> requestForgotPassword(@RequestBody SendEmailRequest request) throws MessagingException {
         ResetPassword resetPassword = authService.requestForgotPassword(request);
 
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(WebResponse.<ResetPassword>builder()
-                .code(HttpStatus.OK.value())
-                .message(HttpStatus.OK.getReasonPhrase())
-                .data(resetPassword)
-                .build());
+        return WebResponse.<ResetPassword>builder()
+            .code(HttpStatus.OK.value())
+            .message(HttpStatus.OK.getReasonPhrase())
+            .data(resetPassword)
+            .build();
     }
 
     @PutMapping(
@@ -66,15 +65,13 @@ public class AuthController {
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<WebResponse<ResetPassword>> confirmForgotPassword(@RequestBody ForgotPasswordRequest request) {
-        ResetPassword resetPassword = authService.confirmForgotPassword(request);
+    public WebResponse<String> confirmForgotPassword(@RequestBody ForgotPasswordRequest request) {
+        authService.confirmForgotPassword(request);
 
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(WebResponse.<ResetPassword>builder()
-                .code(HttpStatus.OK.value())
-                .message(HttpStatus.OK.getReasonPhrase())
-                .data(resetPassword)
-                .build());
+        return WebResponse.<String>builder()
+            .code(HttpStatus.OK.value())
+            .message(HttpStatus.OK.getReasonPhrase())
+            .build();
     }
 
 }

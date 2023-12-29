@@ -20,6 +20,6 @@ public interface AuthService {
 
     ResetPassword requestForgotPassword(SendEmailRequest request) throws MessagingException;
 
-    ResetPassword confirmForgotPassword(ForgotPasswordRequest forgotPasswordRequest);
+    void confirmForgotPassword(ForgotPasswordRequest forgotPasswordRequest);
 
 }

@@ -23,10 +23,6 @@ public class ForgotPasswordRequest {
 
     @NotBlank
     @Size(min = 8, max = 100)
-    private String oldPassword;
-
-    @NotBlank
-    @Size(min = 8, max = 100)
     private String newPassword;
 
     @NotBlank

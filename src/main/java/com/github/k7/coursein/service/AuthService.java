@@ -6,10 +6,13 @@ import com.github.k7.coursein.model.ForgotPasswordRequest;
 import com.github.k7.coursein.model.SendEmailRequest;
 
 import javax.mail.MessagingException;
+import com.github.k7.coursein.model.UserResponse;
 
 public interface AuthService {
 
-    String login(LoginRequest request);
+    UserResponse login(LoginRequest request);
+
+    String createToken(String username);
 
     void sendForgotPasswordEmail(String toEmail, String resetLink) throws MessagingException;
 

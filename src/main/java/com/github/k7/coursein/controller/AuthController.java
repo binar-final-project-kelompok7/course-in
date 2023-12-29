@@ -4,6 +4,7 @@ import com.github.k7.coursein.entity.ResetPassword;
 import com.github.k7.coursein.model.LoginRequest;
 import com.github.k7.coursein.model.ForgotPasswordRequest;
 import com.github.k7.coursein.model.SendEmailRequest;
+import com.github.k7.coursein.model.UserResponse;
 import com.github.k7.coursein.model.WebResponse;
 import com.github.k7.coursein.service.AuthService;
 import lombok.AllArgsConstructor;
@@ -31,14 +32,16 @@ public class AuthController {
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<WebResponse<String>> login(@RequestBody LoginRequest request) {
-        String token = authService.login(request);
+    public ResponseEntity<WebResponse<UserResponse>> login(@RequestBody LoginRequest request) {
+        UserResponse userResponse = authService.login(request);
+        String token = authService.createToken(userResponse.getUsername());
 
         return ResponseEntity.status(HttpStatus.OK)
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-            .body(WebResponse.<String>builder()
+            .body(WebResponse.<UserResponse>builder()
                 .code(HttpStatus.OK.value())
                 .message(HttpStatus.OK.getReasonPhrase())
+                .data(userResponse)
                 .build());
     }
 

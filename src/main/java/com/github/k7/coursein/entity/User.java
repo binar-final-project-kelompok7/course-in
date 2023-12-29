@@ -116,9 +116,4 @@ public class User implements UserDetails, CreatedAtAware, UpdatedAtAware {
         return true;
     }
 
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
 }

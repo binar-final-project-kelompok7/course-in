@@ -276,6 +276,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void sendOtpToEmail(String toEmail, Integer OtpCode) {
+
+        log.info("Sending OTP email to: {}", toEmail);
+
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
         message.setSubject("CourseIn - Register OTP");

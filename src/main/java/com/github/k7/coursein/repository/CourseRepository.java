@@ -1,6 +1,7 @@
 package com.github.k7.coursein.repository;
 
 import com.github.k7.coursein.entity.Course;
+import com.github.k7.coursein.entity.User;
 import com.github.k7.coursein.enums.CourseCategory;
 import com.github.k7.coursein.enums.CourseLevel;
 import com.github.k7.coursein.enums.CourseType;

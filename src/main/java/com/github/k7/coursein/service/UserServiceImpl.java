@@ -28,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -160,7 +159,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponse updateProfilePicture(String username, UploadImageRequest request) throws IOException {
+    public UserResponse updateProfilePicture(String username, UploadImageRequest request) throws Exception {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
 

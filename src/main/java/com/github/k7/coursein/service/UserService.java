@@ -11,9 +11,6 @@ import com.github.k7.coursein.model.UserResponse;
 import com.github.k7.coursein.model.VerifyOtpRequest;
 import com.github.k7.coursein.model.UploadImageRequest;
 
-import java.io.IOException;
-
-
 public interface UserService {
 
     RegisterOTPResponse registerUser(RegisterUserRequest request);
@@ -22,7 +19,7 @@ public interface UserService {
 
     UserResponse updateUser(String username, UpdateUserRequest request);
 
-    UserResponse updateProfilePicture(String username, UploadImageRequest request) throws IOException;
+    UserResponse updateProfilePicture(String username, UploadImageRequest request) throws Exception;
 
     void updatePassword(String username, UpdatePasswordUserRequest request);
 

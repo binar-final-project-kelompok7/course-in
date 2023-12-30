@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @AllArgsConstructor
 @Service
@@ -18,18 +19,22 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     private final Cloudinary cloudinary;
 
     @Override
-    public String upload(String username, UploadImageRequest request) throws IOException {
+    public String upload(String username, UploadImageRequest request) throws Exception {
         log.info("Uploading {}", request.getMultipartFile().getOriginalFilename());
 
         cloudinary.uploader()
             .upload(request.getMultipartFile().getBytes(),
                 ObjectUtils.asMap("public_id", username));
 
+        String fileExtension = Objects.requireNonNull(request.getMultipartFile().getContentType()).split("/")[1];
+
         String link = cloudinary.url().transformation(new Transformation<>()
-            .quality("60")
-            .chain()
-            .dpr("auto")
-        ).generate(username);
+                .quality("60")
+                .chain()
+                .dpr("auto")
+            )
+            .version(cloudinary.api().resource(username, ObjectUtils.emptyMap()).get("version"))
+            .generate(username + "." + fileExtension);
 
         log.info("finished");
 

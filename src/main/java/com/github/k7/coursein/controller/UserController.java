@@ -40,10 +40,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-
-
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -150,7 +146,7 @@ public class UserController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public WebResponse<UserResponse> profilePicture(@PathVariable("username") String username,
-                                                    @ModelAttribute UploadImageRequest request) throws IOException {
+                                                    @ModelAttribute UploadImageRequest request) throws Exception {
         UserResponse userResponse = userService.updateProfilePicture(username, request);
         return WebResponse.<UserResponse>builder()
             .code(HttpStatus.OK.value())

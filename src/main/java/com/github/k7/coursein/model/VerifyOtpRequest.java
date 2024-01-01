@@ -24,4 +24,8 @@ public class VerifyOtpRequest {
     @Size(max = 100)
     private String email;
 
+    @NotBlank
+    @Size(max = 50)
+    private String username;
+
 }

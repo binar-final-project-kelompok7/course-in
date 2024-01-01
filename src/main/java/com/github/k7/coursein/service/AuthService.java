@@ -1,11 +1,9 @@
 package com.github.k7.coursein.service;
 
 import com.github.k7.coursein.entity.ResetPassword;
-import com.github.k7.coursein.model.LoginRequest;
 import com.github.k7.coursein.model.ForgotPasswordRequest;
+import com.github.k7.coursein.model.LoginRequest;
 import com.github.k7.coursein.model.SendEmailRequest;
-
-import javax.mail.MessagingException;
 import com.github.k7.coursein.model.UserResponse;
 
 public interface AuthService {
@@ -14,11 +12,11 @@ public interface AuthService {
 
     String createToken(String username);
 
-    void sendForgotPasswordEmail(String toEmail, String resetLink) throws MessagingException;
+    void sendForgotPasswordEmail(String toEmail, String resetLink);
 
     ResetPassword generateResetToken(String email);
 
-    ResetPassword requestForgotPassword(SendEmailRequest request) throws MessagingException;
+    ResetPassword requestForgotPassword(SendEmailRequest request);
 
     void confirmForgotPassword(ForgotPasswordRequest forgotPasswordRequest);
 

@@ -2,17 +2,17 @@ package com.github.k7.coursein.service;
 
 import com.github.k7.coursein.entity.ResetPassword;
 import com.github.k7.coursein.entity.User;
-import com.github.k7.coursein.model.LoginRequest;
 import com.github.k7.coursein.model.ForgotPasswordRequest;
+import com.github.k7.coursein.model.LoginRequest;
 import com.github.k7.coursein.model.SendEmailRequest;
-import com.github.k7.coursein.repository.ResetPasswordRepository;
 import com.github.k7.coursein.model.UserResponse;
+import com.github.k7.coursein.repository.ResetPasswordRepository;
 import com.github.k7.coursein.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,8 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -75,21 +73,20 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void sendForgotPasswordEmail(String toEmail, String resetLink) throws MessagingException {
-        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+    public void sendForgotPasswordEmail(String toEmail, String resetLink) {
+        log.info("Sending email reset link to: {}", toEmail);
 
-        helper.setTo(toEmail);
-        String emailSubject = "CourseIn - Forgot Password";
-        helper.setSubject(emailSubject);
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("CourseIn - Register OTP");
 
-        String emailText = "Klik link di bawah ini untuk melakukan konfirmasi reset password anda\n"
-            + "jika anda tidak merasa mengirim permintaan, silahkan abaikan email ini.\n\n"
-            + resetLink
+        String emailText = "Klik link di bawah ini untuk melakukan konfirmasi reset password anda"
+            + "\njika anda tidak merasa mengirim permintaan, silahkan abaikan email ini."
+            + "\n\n" + resetLink
             + "\n\nCourseIn team";
-        helper.setText(emailText, true);
+        message.setText(emailText);
 
-        javaMailSender.send(mimeMessage);
+        javaMailSender.send(message);
     }
 
     @Override
@@ -108,7 +105,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public ResetPassword requestForgotPassword(SendEmailRequest request) throws MessagingException {
+    public ResetPassword requestForgotPassword(SendEmailRequest request) {
         validationService.validate(request);
 
         String email = request.getEmail();

@@ -1,8 +1,8 @@
 package com.github.k7.coursein.controller;
 
 import com.github.k7.coursein.entity.ResetPassword;
-import com.github.k7.coursein.model.LoginRequest;
 import com.github.k7.coursein.model.ForgotPasswordRequest;
+import com.github.k7.coursein.model.LoginRequest;
 import com.github.k7.coursein.model.SendEmailRequest;
 import com.github.k7.coursein.model.UserResponse;
 import com.github.k7.coursein.model.WebResponse;
@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.mail.MessagingException;
 
 @RestController
 @AllArgsConstructor
@@ -50,7 +48,7 @@ public class AuthController {
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public WebResponse<ResetPassword> requestForgotPassword(@RequestBody SendEmailRequest request) throws MessagingException {
+    public WebResponse<ResetPassword> requestForgotPassword(@RequestBody SendEmailRequest request) {
         ResetPassword resetPassword = authService.requestForgotPassword(request);
 
         return WebResponse.<ResetPassword>builder()

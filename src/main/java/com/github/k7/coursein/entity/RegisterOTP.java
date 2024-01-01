@@ -16,14 +16,17 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "Otp")
+@Table(name = "user_otp")
 public class RegisterOTP {
 
     @Id
     private Integer otpCode;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String email;
+
+    @Column(nullable = false, length = 50)
+    private String username;
 
     @Column(name = "expired_date", nullable = false)
     private LocalDateTime expiredDate;

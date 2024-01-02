@@ -10,10 +10,11 @@ import com.github.k7.coursein.model.RegisterUserRequest;
 import com.github.k7.coursein.model.ResendOTPRequest;
 import com.github.k7.coursein.model.UpdatePasswordUserRequest;
 import com.github.k7.coursein.model.UpdateUserRequest;
+import com.github.k7.coursein.model.UploadImageRequest;
 import com.github.k7.coursein.model.UserResponse;
+import com.github.k7.coursein.model.VerifyOTPResponse;
 import com.github.k7.coursein.model.VerifyOtpRequest;
 import com.github.k7.coursein.repository.RegisterOtpRepository;
-import com.github.k7.coursein.model.UploadImageRequest;
 import com.github.k7.coursein.repository.RoleRepository;
 import com.github.k7.coursein.repository.UserRepository;
 import com.github.k7.coursein.util.TimeUtil;
@@ -44,8 +45,6 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
 
     private final RegisterOtpRepository registerOtpRepository;
-
-    private final JwtService jwtService;
 
     private final ValidationService validationService;
 
@@ -87,7 +86,7 @@ public class UserServiceImpl implements UserService {
 
         log.info("Register temporary user with username : {}", request.getUsername());
 
-        RegisterOTP registerOTP = generateOtp(request.getEmail());
+        RegisterOTP registerOTP = generateOtp(request.getEmail(), request.getUsername());
         registerOtpRepository.save(registerOTP);
 
         sendOtpToEmail(request.getEmail(), registerOTP.getOtpCode());
@@ -97,9 +96,8 @@ public class UserServiceImpl implements UserService {
 
     private static RegisterOTPResponse toRegisterOTPResponse(RegisterOTP registerOTP) {
         return RegisterOTPResponse.builder()
-            .otpCode(registerOTP.getOtpCode())
-            .expiredDate(registerOTP.getExpiredDate())
             .email(registerOTP.getEmail())
+            .username(registerOTP.getUsername())
             .build();
     }
 
@@ -227,7 +225,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public String verifyOTP(VerifyOtpRequest request) {
+    public VerifyOTPResponse verifyOTP(VerifyOtpRequest request) {
         validationService.validate(request);
 
         RegisterOTP registerOTP = registerOtpRepository.findByEmailAndOtpCode(request.getEmail(), request.getOtpCode())
@@ -249,7 +247,13 @@ public class UserServiceImpl implements UserService {
         log.info("User {} has been successfully verified and enabled", user.getUsername());
         log.info("Delete OTP for user email: {}", registerOTP.getEmail());
 
-        return jwtService.generateToken(user);
+        return toVerifyOTPResponse(user);
+    }
+
+    private VerifyOTPResponse toVerifyOTPResponse(User user) {
+        return VerifyOTPResponse.builder()
+            .username(user.getUsername())
+            .build();
     }
 
     @Override
@@ -260,13 +264,15 @@ public class UserServiceImpl implements UserService {
         RegisterOTP registerOTP = registerOtpRepository.findByEmail(request.getEmail())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Email user not found"));
 
-        RegisterOTP newUserOtp = generateOtp(registerOTP.getEmail());
-
-        sendOtpToEmail(registerOTP.getEmail(), newUserOtp.getOtpCode());
+        RegisterOTP newUserOtp = generateOtp(registerOTP.getEmail(), registerOTP.getUsername());
 
         registerOtpRepository.delete(registerOTP);
 
+        log.info("Success to delete old user otp data with username: {}", registerOTP.getUsername());
+
         registerOtpRepository.save(newUserOtp);
+
+        sendOtpToEmail(newUserOtp.getEmail(), newUserOtp.getOtpCode());
 
         log.info("OTP code successfully updated for email: {}", newUserOtp.getEmail());
 
@@ -275,8 +281,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void sendOtpToEmail(String toEmail, Integer OtpCode) {
-
-        log.info("Sending OTP email to: {}", toEmail);
+        log.info("Sending email OTP to: {}", toEmail);
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
@@ -284,7 +289,7 @@ public class UserServiceImpl implements UserService {
 
         String emailText = "Terima kasih telah melakukan register "
             + "\nSilahkan masukkan kode OTP anda sebagai berikut"
-            + ",OTP : " + OtpCode
+            + "\nOTP : " + OtpCode
             + "\nsegera masukkan kode OTP ini sebelum usang "
             + "\n\nCourseIn Team";
 
@@ -296,15 +301,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public RegisterOTP generateOtp(String email) {
+    public RegisterOTP generateOtp(String email, String username) {
         Integer otpCode = new Random().nextInt(900000) + 100000;
 
         log.info("Generate otp for email: {}", email);
 
-        LocalDateTime expiredDate = LocalDateTime.now().plusMinutes(1);
+        LocalDateTime expiredDate = LocalDateTime.now().plusMinutes(5);
 
         RegisterOTP registerOTP = RegisterOTP.builder()
             .otpCode(otpCode)
+            .username(username)
             .email(email)
             .expiredDate(expiredDate)
             .build();

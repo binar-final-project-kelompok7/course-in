@@ -7,9 +7,10 @@ import com.github.k7.coursein.model.RegisterUserRequest;
 import com.github.k7.coursein.model.ResendOTPRequest;
 import com.github.k7.coursein.model.UpdatePasswordUserRequest;
 import com.github.k7.coursein.model.UpdateUserRequest;
-import com.github.k7.coursein.model.UserResponse;
-import com.github.k7.coursein.model.VerifyOtpRequest;
 import com.github.k7.coursein.model.UploadImageRequest;
+import com.github.k7.coursein.model.UserResponse;
+import com.github.k7.coursein.model.VerifyOTPResponse;
+import com.github.k7.coursein.model.VerifyOtpRequest;
 
 public interface UserService {
 
@@ -27,12 +28,12 @@ public interface UserService {
 
     long countUser();
 
-    String verifyOTP(VerifyOtpRequest request);
+    VerifyOTPResponse verifyOTP(VerifyOtpRequest request);
 
     RegisterOTPResponse resendOtp(ResendOTPRequest request);
 
     void sendOtpToEmail(String toEmail, Integer OtpCode) throws RuntimeException;
 
-    RegisterOTP generateOtp(String email);
+    RegisterOTP generateOtp(String email, String username);
 
 }

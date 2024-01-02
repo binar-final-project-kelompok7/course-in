@@ -9,10 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RegisterOTPResponse {
-
-    String email;
+public class VerifyOTPResponse {
 
     String username;
-
+    
 }

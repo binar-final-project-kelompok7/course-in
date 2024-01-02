@@ -52,6 +52,8 @@ public class SecurityConfiguration {
             .antMatchers(HttpMethod.POST, "/api/v1/users/register").permitAll()
             .antMatchers(HttpMethod.POST, "/api/v1/users/resend-otp").permitAll()
             .antMatchers(HttpMethod.POST, "/api/v1/users/verify-otp").permitAll()
+            .antMatchers(HttpMethod.POST, "/api/v1/users/forgot-password").permitAll()
+            .antMatchers(HttpMethod.POST, "/api/v1/users/confirm-forgot-password").permitAll()
             .antMatchers(HttpMethod.GET, "/api/v1/users/count/**").hasRole(UserRole.ADMIN.name())
             .antMatchers(HttpMethod.GET, "/api/v1/courses/count/**").hasRole(UserRole.ADMIN.name())
             .antMatchers(HttpMethod.GET, "/api/v1/courses/count/premium/**").hasRole(UserRole.ADMIN.name())

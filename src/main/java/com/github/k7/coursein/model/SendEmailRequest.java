@@ -17,4 +17,5 @@ public class SendEmailRequest {
     @NotBlank
     @Size(max = 100)
     private String email;
+    
 }

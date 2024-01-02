@@ -1,9 +1,7 @@
 package com.github.k7.coursein.controller;
 
-import com.github.k7.coursein.entity.ResetPassword;
 import com.github.k7.coursein.model.ForgotPasswordRequest;
 import com.github.k7.coursein.model.ForgotPasswordResponse;
-import com.github.k7.coursein.model.LoginRequest;
 import com.github.k7.coursein.model.LoginRequest;
 import com.github.k7.coursein.model.SendEmailRequest;
 import com.github.k7.coursein.model.UserResponse;
@@ -45,12 +43,12 @@ public class AuthController {
                 .build());
     }
 
-    @PutMapping(
+    @PostMapping(
         path = "/forgot-password",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public WebResponse<ForgotPasswordResponse> requestForgotPassword(@RequestBody SendEmailRequest request) throws MessagingException {
+    public WebResponse<ForgotPasswordResponse> requestForgotPassword(@RequestBody SendEmailRequest request) {
         ForgotPasswordResponse response = authService.requestForgotPassword(request);
 
         return WebResponse.<ForgotPasswordResponse>builder()

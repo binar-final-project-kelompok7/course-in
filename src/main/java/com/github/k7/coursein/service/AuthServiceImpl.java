@@ -112,16 +112,13 @@ public class AuthServiceImpl implements AuthService {
     public ForgotPasswordResponse requestForgotPassword(SendEmailRequest request) {
         validationService.validate(request);
 
-        String email = request.getEmail();
-
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmail(request.getEmail())
             .orElseThrow(() -> {
-                log.info("User mot found with email: {}", email);
+                log.info("User mot found with email: {}", request.getEmail());
                 return new ResponseStatusException(HttpStatus.NOT_FOUND, "User email not found");
             });
 
-        ResetPassword resetPassword = generateResetToken(email);
-
+        ResetPassword resetPassword = generateResetToken(user.getEmail());
         resetPasswordRepository.save(resetPassword);
 
         String urlPageResetPassword = "https://fpbinar-kel7.vercel.app/resetpassword-confirm/";
@@ -129,8 +126,6 @@ public class AuthServiceImpl implements AuthService {
         String resetLink = urlPageResetPassword + resetPassword.getToken();
 
         sendForgotPasswordEmail(user.getEmail(), resetLink);
-
-        resetPasswordRepository.save(resetPassword);
 
         return toForgotPasswordResponse(resetPassword);
     }
@@ -163,7 +158,7 @@ public class AuthServiceImpl implements AuthService {
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
-        resetPasswordRepository.deleteById(resetPassword.getToken());
+        resetPasswordRepository.deleteByEmail(resetPassword.getEmail());
     }
 
 }

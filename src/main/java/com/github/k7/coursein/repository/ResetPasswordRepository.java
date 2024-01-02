@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ResetPasswordRepository extends JpaRepository<ResetPassword, String> {
+
+    void deleteByEmail(String email);
+
 }

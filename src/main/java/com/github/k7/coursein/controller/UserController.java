@@ -6,18 +6,20 @@ import com.github.k7.coursein.enums.CourseLevel;
 import com.github.k7.coursein.enums.CourseType;
 import com.github.k7.coursein.model.CourseResponse;
 import com.github.k7.coursein.model.DeleteUserRequest;
-import com.github.k7.coursein.model.RegisterOTPResponse;
 import com.github.k7.coursein.model.OrderResponse;
 import com.github.k7.coursein.model.PagingResponse;
 import com.github.k7.coursein.model.PayOrderRequest;
+import com.github.k7.coursein.model.RegisterOTPResponse;
 import com.github.k7.coursein.model.RegisterUserRequest;
 import com.github.k7.coursein.model.ResendOTPRequest;
 import com.github.k7.coursein.model.UpdatePasswordUserRequest;
 import com.github.k7.coursein.model.UpdateUserRequest;
 import com.github.k7.coursein.model.UploadImageRequest;
 import com.github.k7.coursein.model.UserResponse;
+import com.github.k7.coursein.model.VerifyOTPResponse;
 import com.github.k7.coursein.model.VerifyOtpRequest;
 import com.github.k7.coursein.model.WebResponse;
+import com.github.k7.coursein.service.AuthService;
 import com.github.k7.coursein.service.CourseService;
 import com.github.k7.coursein.service.OrderService;
 import com.github.k7.coursein.service.UserService;
@@ -56,6 +58,8 @@ public class UserController {
 
     private final CourseService courseService;
 
+    private final AuthService authService;
+
     @PostMapping(
         path = "/register",
         consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -75,13 +79,17 @@ public class UserController {
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<WebResponse<String>> verifyOtp(@RequestBody VerifyOtpRequest request) {
-        String token = userService.verifyOTP(request);
+    public ResponseEntity<WebResponse<VerifyOTPResponse>> verifyOtp(@RequestBody VerifyOtpRequest request) {
+        VerifyOTPResponse response = userService.verifyOTP(request);
+
+        String token = authService.createToken(request.getUsername());
+
         return ResponseEntity.status(HttpStatus.CREATED)
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-            .body(WebResponse.<String>builder()
+            .body(WebResponse.<VerifyOTPResponse>builder()
                 .code(HttpStatus.CREATED.value())
                 .message(HttpStatus.CREATED.getReasonPhrase())
+                .data(response)
                 .build());
     }
 

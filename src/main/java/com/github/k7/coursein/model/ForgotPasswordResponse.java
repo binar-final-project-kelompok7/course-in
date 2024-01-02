@@ -5,17 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SendEmailRequest {
+public class ForgotPasswordResponse {
 
-    @NotBlank
-    @Size(max = 100)
+    private String token;
+
     private String email;
-    
+
 }

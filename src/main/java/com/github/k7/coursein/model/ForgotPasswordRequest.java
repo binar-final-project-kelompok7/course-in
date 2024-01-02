@@ -18,10 +18,6 @@ public class ForgotPasswordRequest {
     private String token;
 
     @NotBlank
-    @Size(max = 100)
-    private String email;
-
-    @NotBlank
     @Size(min = 8, max = 100)
     private String newPassword;
 

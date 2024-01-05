@@ -107,6 +107,8 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsernameOrEmail(username, username)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
+        validationService.validateAuth(user);
+
         log.info("Get user success with username : {}", username);
 
         return toUserResponse(user);
@@ -118,7 +120,6 @@ public class UserServiceImpl implements UserService {
             .name(user.getName())
             .email(user.getEmail())
             .pictLink(user.getProfilePicture())
-            .enabled(user.isEnabled())
             .createdAt(TimeUtil.formatToString(user.getCreatedAt()))
             .updatedAt(TimeUtil.formatToString(user.getUpdatedAt()))
             .build();
@@ -131,6 +132,8 @@ public class UserServiceImpl implements UserService {
 
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        validationService.validateAuth(user);
 
         if (Objects.nonNull(request.getUsername())) {
             user.setUsername(request.getUsername());
@@ -161,6 +164,8 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND));
 
+        validationService.validateAuth(user);
+
         if (Objects.nonNull(user.getProfilePicture())) {
             log.info("Found previous profile picture link");
             log.info("Deleting previous profile picture link...");
@@ -187,6 +192,8 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
+        validationService.validateAuth(user);
+
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid password");
         }
@@ -207,6 +214,8 @@ public class UserServiceImpl implements UserService {
 
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        validationService.validateAuth(user);
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid password");

@@ -61,6 +61,17 @@ public class UserServiceImpl implements UserService {
     public RegisterOTPResponse registerUser(RegisterUserRequest request) {
         validationService.validate(request);
 
+        Optional<User> disabledUserOptional = userRepository.findByEmail(request.getEmail());
+
+        if (disabledUserOptional.isPresent()) {
+            User disabledUser = disabledUserOptional.get();
+
+            if (!disabledUser.isEnabled()) {
+                userRepository.delete(disabledUser);
+                log.info("Success to delete user with status disable for email: {}", disabledUser.getEmail());
+            }
+        }
+
         if (userRepository.existsByUsernameOrEmail(request.getUsername(), request.getEmail())) {
             log.warn(
                 "User with username : {} or email : {} already exists", request.getUsername(), request.getEmail()
@@ -118,7 +129,6 @@ public class UserServiceImpl implements UserService {
             .name(user.getName())
             .email(user.getEmail())
             .pictLink(user.getProfilePicture())
-            .enabled(user.isEnabled())
             .createdAt(TimeUtil.formatToString(user.getCreatedAt()))
             .updatedAt(TimeUtil.formatToString(user.getUpdatedAt()))
             .build();
@@ -306,7 +316,7 @@ public class UserServiceImpl implements UserService {
 
         log.info("Generate otp for email: {}", email);
 
-        LocalDateTime expiredDate = LocalDateTime.now().plusMinutes(5);
+        LocalDateTime expiredDate = LocalDateTime.now().plusMinutes(2);
 
         RegisterOTP registerOTP = RegisterOTP.builder()
             .otpCode(otpCode)

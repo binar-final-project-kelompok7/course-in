@@ -73,7 +73,6 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional
     public void sendForgotPasswordEmail(String toEmail, String resetLink) {
         log.info("Sending resetlink to email: {}", toEmail);
 

@@ -73,7 +73,6 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional
     public void sendForgotPasswordEmail(String toEmail, String resetLink) {
         log.info("Sending resetlink to email: {}", toEmail);
 
@@ -120,6 +119,10 @@ public class AuthServiceImpl implements AuthService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is disabled, cannot request reset password");
         }
 
+        if (!user.isEnabled()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please verify your email first!");
+        }
+
         ResetPassword resetPassword = generateResetToken(user.getEmail());
         resetPasswordRepository.save(resetPassword);
 
@@ -153,6 +156,10 @@ public class AuthServiceImpl implements AuthService {
 
         User user = userRepository.findByEmail(resetPassword.getEmail())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User email not found"));
+
+        if (!user.isEnabled()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please verify your email first!");
+        }
 
         if (!Objects.equals(request.getNewPassword(), request.getConfirmNewPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password and confirm password do not match");

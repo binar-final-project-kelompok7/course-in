@@ -54,6 +54,8 @@ public class OrderServiceImpl implements OrderService {
         User user = userRepository.findByUsername(request.getUsername())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found!"));
 
+        validationService.validateAuth(user);
+
         Course course = courseRepository.findByCode(request.getCourseCode())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found!"));
 
@@ -89,6 +91,8 @@ public class OrderServiceImpl implements OrderService {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
+        validationService.validateAuth(user);
+
         Pageable pageable = PageRequest.of(page, size);
 
         Page<Order> orders = orderRepository.findAllByUser(user, pageable);
@@ -103,6 +107,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public OrderResponse getOrder(String username, String id) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        validationService.validateAuth(user);
+
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, ORDER_NOT_FOUND));
 
@@ -134,6 +143,8 @@ public class OrderServiceImpl implements OrderService {
 
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found!"));
+
+        validationService.validateAuth(user);
 
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, ORDER_NOT_FOUND));

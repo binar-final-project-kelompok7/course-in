@@ -119,10 +119,6 @@ public class AuthServiceImpl implements AuthService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is disabled, cannot request reset password");
         }
 
-        if (!user.isEnabled()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please verify your email first!");
-        }
-
         ResetPassword resetPassword = generateResetToken(user.getEmail());
         resetPasswordRepository.save(resetPassword);
 

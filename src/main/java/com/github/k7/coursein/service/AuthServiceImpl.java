@@ -112,13 +112,11 @@ public class AuthServiceImpl implements AuthService {
         validationService.validate(request);
 
         User user = userRepository.findByEmail(request.getEmail())
-            .orElseThrow(() -> {
-                log.info("User mot found with email: {}", request.getEmail());
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "User email not found");
-            });
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User email not found"));
 
         if (!user.isEnabled()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please verify your email first!");
+            log.warn("Request reset password failed. User with email: {} is disabeld", user.getEmail());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is disabled, cannot request reset password");
         }
 
         ResetPassword resetPassword = generateResetToken(user.getEmail());

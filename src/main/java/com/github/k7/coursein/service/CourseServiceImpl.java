@@ -23,11 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -246,19 +242,14 @@ public class CourseServiceImpl implements CourseService {
         if (filters != null && !filters.isEmpty() && (filteredCourses.isEmpty())) {
             if (filters.contains(CourseFilter.NEWEST)) {
                 courses.stream()
-                    .filter(course -> TimeUtil.isBefore7Days(course.getCreatedAt()))
+                    .sorted(Comparator.comparing((Course::getCreatedAt)).reversed())
                     .forEach(filteredCourses::add);
             }
 
             if (filters.contains(CourseFilter.POPULAR)) {
                 courses.stream()
-                    .filter(Objects::nonNull)
-                    .forEach(filteredCourses::add);
-            }
-
-            if (filters.contains(CourseFilter.DISCOUNT)) {
-                courses.stream()
-                    .filter(Objects::nonNull)
+                    .filter(course -> !course.getUsers().isEmpty())
+                    .sorted((o1, o2) -> o2.getUsers().size() - o1.getUsers().size())
                     .forEach(filteredCourses::add);
             }
         }
